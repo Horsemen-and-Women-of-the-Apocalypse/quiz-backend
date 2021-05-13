@@ -1,0 +1,24 @@
+# Node
+node_modules
+package-lock.json
+
+# Babel
+build
+
+# Application log
+log
+
+# IDE
+.idea
+
+# Configurations
+config/app.production.ini
+config/app.development.ini
+config/app.test.ini
+
+# Coverage
+.nyc_output
+coverage
+
+# Temp
+tmp
