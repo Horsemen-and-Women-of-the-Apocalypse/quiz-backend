@@ -8,7 +8,7 @@ const projectPackage = JSON.parse(fs.readFileSync("./package.json", "UTF-8"));
 
 describe("API", () => {
     describe("/version", () => {
-        it("Should throw a workspace error", async () => {
+        it("Version should be " + projectPackage.version, async () => {
             const response = await chai.request(SERVER_URL).get(VERSION_ROUTE).send();
 
             chai.assert.equal(response.status, 200);

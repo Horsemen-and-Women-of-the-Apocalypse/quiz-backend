@@ -1,21 +1,39 @@
+import WebsocketService from "./ws";
+
 /**
  * Service container
  */
 class ServiceContainer {
+    /**
+     * Constructor
+     * @param ws {WebsocketService} Websocket service
+     */
+    constructor(ws) {
+        this._ws = ws;
+    }
 
+    /**
+     * Get websocket service
+     *
+     * @return {WebsocketService} Service
+     */
+    get ws() {
+        return this._ws;
+    }
 }
 
 /**
  * Init services container
  *
- * @return {Promise<ServiceContainer>} Container
+ * @param {Server} server HTTP server
+ * @return {Promise<ServiceContainer>} Services container
  */
-const init = async () => {
-    const container = new ServiceContainer();
+const init = async (server) => {
+    // Initialize services
+    const ws = new WebsocketService();
+    ws.init(server);
 
-    // TODO: Initialize services
-
-    return container;
+    return new ServiceContainer(ws);
 };
 
 export default init;
