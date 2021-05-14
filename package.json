@@ -1,0 +1,47 @@
+{
+    "name": "quiz-backend",
+    "version": "0.0.0",
+    "scripts": {
+        "test": "npm run build-src && npm run build-tests && npm run test-coverage",
+        "test:ci": "npm run build-src && npm run build-tests && npm run test-coverage:ci",
+        "test-run": "./node_modules/.bin/cross-env NODE_ENV=test ./node_modules/.bin/mocha --timeout 60s \"build/test/**/*.*spec.js\"",
+        "test-run:ci": "./node_modules/.bin/cross-env NODE_ENV=ci ./node_modules/.bin/mocha --timeout 60s \"build/test/**/*.spec.js\"",
+        "test-coverage": "./node_modules/.bin/nyc --reporter=html npm run test-run",
+        "test-coverage:ci": "./node_modules/.bin/nyc npm run test-run:ci",
+        "start:dev": "./node_modules/.bin/cross-env NODE_ENV=development ./node_modules/.bin/nodemon src/index.js --exec ./node_modules/.bin/babel-node",
+        "start:prod": "./node_modules/.bin/cross-env NODE_ENV=production node build/src/index.js",
+        "lint": "./node_modules/.bin/cross-env NODE_ENV=production ./node_modules/.bin/eslint src/** test/**",
+        "lint:fix": "./node_modules/.bin/cross-env NODE_ENV=production ./node_modules/.bin/eslint --fix src/** test/**",
+        "build-src": "./node_modules/.bin/babel src -d build/src",
+        "build-tests": "./node_modules/.bin/babel test -d build/test"
+    },
+    "dependencies": {
+        "cors": "^2.8.4",
+        "eslint": "^5.9.0",
+        "express": "^4.16.2",
+        "ini": "^1.3.5",
+        "response-time": "^2.3.2",
+        "semaphore": "^1.1.0",
+        "winston": "^3.0.0",
+        "winston-daily-rotate-file": "^4.4.1"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.8.4",
+        "@babel/core": "^7.8.7",
+        "@babel/node": "^7.8.7",
+        "@babel/plugin-transform-runtime": "^7.8.3",
+        "@babel/polyfill": "^7.8.7",
+        "@babel/preset-env": "^7.8.7",
+        "@babel/register": "^7.8.6",
+        "chai": "^4.2.0",
+        "chai-http": "^4.3.0",
+        "cross-env": "^6.0.3",
+        "mocha": "^7.0.0",
+        "nodemon": "^2.0.1",
+        "nyc": "^15.0.0"
+    },
+    "engines": {
+        "node": "12.13.1"
+    },
+    "engineStrict": true
+}

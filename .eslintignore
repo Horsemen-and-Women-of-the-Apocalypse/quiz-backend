@@ -1,0 +1,6 @@
+config/*.ini
+test/integration/files/**
+test/services/docker/badBuildParameters/**
+test/services/docker/badConfigFile/**
+test/services/docker/badRunParameters/**
+test/services/docker/goodProjects/**
