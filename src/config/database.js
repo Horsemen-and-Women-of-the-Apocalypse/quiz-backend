@@ -26,4 +26,4 @@ if (!(config instanceof Object)) {
 // Assert config
 assert(config);
 
-export { config };
+export default config;

@@ -4,10 +4,12 @@ import { Server } from "http";
 import responseTime from "response-time";
 import Semaphore from "semaphore";
 import serverConfig from "./config/server";
+import databaseConfig from "./config/database";
 import { init as initRoutes, Response } from "./router/router";
 import initServices from "./services";
 import { LOGGER, path } from "./utils";
 import { DEVELOPMENT_MODE, environment } from "./utils/node";
+import { MongoClient } from "mongodb";
 
 // Create application & websocket
 const app = express();
@@ -42,6 +44,20 @@ server.listen(serverConfig.port, async () => {
     try {
         // Init services here
         const services = await initServices();
+
+        // Test database conncetion
+        const url = databaseConfig.url;
+        const client = new MongoClient(url, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            auth: databaseConfig.auth
+        });
+
+        LOGGER.info("[Main] Testing the connection to the database");
+        await client.connect();
+        await client.db("admin").command({ ping: 1 });
+        LOGGER.info("[Main] Connected successfully to the MongoDB database");
+
 
         // Set-up routes
         initRoutes(app, services, path(__dirname, "router", "routes"));
