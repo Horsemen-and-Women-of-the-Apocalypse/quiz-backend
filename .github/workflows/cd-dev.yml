@@ -1,0 +1,20 @@
+name: Develop branch Continuous Deployment
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    name: Deploy to hosted server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remote ssh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.REMOTE_HOST}}
+          username: ${{secrets.REMOTE_USER}}
+          password: ${{secrets.REMOTE_PASSWORD}}
+          port: ${{secrets.REMOTE_PORT}}
+          script: ./deploy-backend.sh
