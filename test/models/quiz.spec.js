@@ -38,5 +38,38 @@ describe("Quiz", () => {
             assert.sameMembers(testQuiz.questions, quizObj.questions);
             assert.equal(testQuiz.name, quizObj.name);
         });
+
+        it("#Expected a string for parameter 'name'", () => {
+            assert.throws(() => {
+                try {
+                    const dont = new Quiz(12, 12);
+                    dont.id = 12;
+                } catch (err) {
+                    throw(err);
+                }
+            }, Error, "Expected a string for parameter 'name'");
+        });
+
+        it("#Unexpected type in 'questions' array", () => {
+            assert.throws(() => {
+                try {
+                    const dont = new Quiz("12", [ q1, 12 ]);
+                    dont.id = 12;
+                } catch (err) {
+                    throw(err);
+                }
+            }, Error, "Unexpected type in 'questions' array");
+        });
+
+        it("#Expected an array for parameter 'questions'", () => {
+            assert.throws(() => {
+                try {
+                    const dont = new Quiz("12", 12);
+                    dont.id = 12;
+                } catch (err) {
+                    throw(err);
+                }
+            }, Error, "Expected an array for parameter 'questions'");
+        });
     });
 });
