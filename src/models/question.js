@@ -1,32 +1,44 @@
 /**
- * Question interface
+ * Multiple choice question class
  */
-class IQuestion {
-    constructor() {
-        this.title;
-        this.answer;
+class StringMultipleChoiceQuestion {
+    constructor(question, choices, solutionIndex) {
+        this._question = question;
+        this._choices = choices;
+        this._solutionIndex = solutionIndex;
     }
 
     /**
-     * Check the answer depending on question type
+     * Check the answer
      * 
-     * @param {*} input User input
+     * @param {int} answer User answer index 
+     * @returns 
      */
-    checkAnswer(input) {}
-}
-
-/**
- * Multiple choice question class
- */
-class StringMultipleChoiceQuestion extends IQuestion {
-    constructor() {
-        super();
-        this.choices;
-        this.solutionIndex;
-    }
-
-    checkAnswer(userChoice) {
+    isAnswer(answer) {
         // XXX: If there are several user choices and solution indexes, they need to be sorted first
-        return userChoice === this.solutionIndex;
+        return answer === this._solutionIndex;
+    }
+
+    /**
+     * Get question
+     */
+    get question() {
+        return this._question;
+    }
+
+    /**
+     * Get choices
+     */
+    get choices() {
+        return this._choices;
+    }
+
+    /**
+     * Get solution index
+     */
+    get solutionIndex() {
+        return this._solutionIndex;
     }
 }
+
+export { StringMultipleChoiceQuestion };
