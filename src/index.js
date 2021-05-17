@@ -8,6 +8,7 @@ import { init as initRoutes, Response } from "./router/router";
 import initServices from "./services";
 import { LOGGER, path } from "./utils";
 import { DEVELOPMENT_MODE, environment } from "./utils/node";
+import MongoDB from "./services/db/db";
 
 // Create application & websocket
 const app = express();
@@ -35,6 +36,8 @@ const startSemaphore = new Semaphore(1);
 startSemaphore.take(() => {
 });
 
+var database;
+
 // Start app
 server.listen(serverConfig.port, async () => {
     LOGGER.info("[Main] App listening on port : " + serverConfig.port + " (mode: " + environment() + ")");
@@ -42,6 +45,12 @@ server.listen(serverConfig.port, async () => {
     try {
         // Init services here
         const services = await initServices(server);
+
+        // Database connection test
+        database = new MongoDB();
+        LOGGER.info("[Main] Testing the connection to the database");
+        await database.init();
+        LOGGER.info("[Main] Connected successfully to the MongoDB database");
 
         // Set-up routes
         initRoutes(app, services, path(__dirname, "router", "routes"));
@@ -64,4 +73,4 @@ server.listen(serverConfig.port, async () => {
     }
 });
 
-export { server, startSemaphore };
+export { server, database, startSemaphore };
