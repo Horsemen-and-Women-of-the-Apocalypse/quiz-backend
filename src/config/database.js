@@ -12,7 +12,7 @@ const assert = (config) => {
         LOGGER.warn("Main database isn't defined");
     }
 
-    // Ingore auth berification when ci
+    // Ignore auth verification when ci
     if (environment() !== "ci") {
         if (!(config.auth instanceof Object) || typeof config.auth.user !== "string") {
             throw new Error("Database user isn't defined");

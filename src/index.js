@@ -44,7 +44,7 @@ server.listen(serverConfig.port, async () => {
         // Init services here
         const services = await initServices();
 
-        // Test database conncetion
+        // Database connection test
         const db = new MongoDB();
         LOGGER.info("[Main] Testing the connection to the database");
         await db.init();
