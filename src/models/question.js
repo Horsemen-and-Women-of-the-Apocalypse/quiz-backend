@@ -15,6 +15,12 @@ class StringMultipleChoiceQuestion extends Question {
         if(Array.isArray(choices)) {
             if(choices.length < 2) {
                 throw new Error("'choices' must contain at least 2 elements");
+            } else {
+                for (let i = 0; i < choices.length; i ++) {
+                    if (typeof choices[i] !== "string") {
+                        throw new Error("'Choices' must contain strings");
+                    }
+                }
             }
         } else {
             throw new Error("Expected an array for parameter 'choices'");

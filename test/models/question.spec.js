@@ -21,7 +21,7 @@ describe("Question", () => {
             it("#string expected for 'question'", () => {
                 assert.throws(() => {
                     try {
-                        const dont = new StringMultipleChoiceQuestion(12, [ 12, 12 ], 0);
+                        const dont = new StringMultipleChoiceQuestion(12, [ "12", "12" ], 0);
                         dont.isAnswer(12);
                     } catch (err) {
                         throw(err);
@@ -33,12 +33,23 @@ describe("Question", () => {
         it("#'choices' must contain at least 2 elements", () => {
             assert.throws(() => {
                 try {
-                    const dont = new StringMultipleChoiceQuestion("12?", [ 12 ], 0);
+                    const dont = new StringMultipleChoiceQuestion("12?", [ "12" ], 0);
                     dont.isAnswer(12);
                 } catch (err) {
                     throw(err);
                 }
             }, Error, "'choices' must contain at least 2 elements");
+        });
+
+        it("'Choices' must contain strings", () => {
+            assert.throws(() => {
+                try {
+                    const dont = new StringMultipleChoiceQuestion("12?", [ 12, 12, 12 ], 0);
+                    dont.isAnswer(12);
+                } catch (err) {
+                    throw(err);
+                }
+            }, Error, "'Choices' must contain strings");
         });
 
         it("#Expected an array for parameter 'choices'", () => {
