@@ -70,8 +70,6 @@ server.listen(serverConfig.port, async () => {
     } catch (e) {
         LOGGER.exception(e);
         process.exit(1);
-    } finally {
-        console.log("================== end");
     }
 });
 
