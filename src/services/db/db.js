@@ -17,6 +17,7 @@ class quizDB {
      */
     async init() {
         await client.connect();
+        await client.db("admin").command({ ping: 1 });
         this.db = client.db(dbName);
     }
 
