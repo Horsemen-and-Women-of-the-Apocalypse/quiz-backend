@@ -1,5 +1,6 @@
 import { LOGGER } from "../utils";
 import { database as config } from "./config";
+import { environment } from "../utils/node";
 
 /**
  * Function to assert configuration
@@ -11,11 +12,14 @@ const assert = (config) => {
         LOGGER.warn("Main database isn't defined");
     }
 
-    if (!(config.auth instanceof Object) || typeof config.auth.user !== "string") {
-        throw new Error("Database user isn't defined");
-    }
-    if (!(config.auth instanceof Object) || typeof config.auth.password !== "string") {
-        throw new Error("Database user's password isn't defined");
+    // Ingore auth berification when ci
+    if (environment() !== "ci") {
+        if (!(config.auth instanceof Object) || typeof config.auth.user !== "string") {
+            throw new Error("Database user isn't defined");
+        }
+        if (!(config.auth instanceof Object) || typeof config.auth.password !== "string") {
+            throw new Error("Database user's password isn't defined");
+        }
     }
 };
 
