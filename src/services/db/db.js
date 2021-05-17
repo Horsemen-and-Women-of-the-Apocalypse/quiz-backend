@@ -49,6 +49,14 @@ class quizDB {
         const result = await collec.insertOne(document);
         return result.insertedId;
     }
+
+    /**
+     * Close the database
+     * @returns {Promise<void>}
+     */
+    close() {
+        return client.close();
+    }
 }
 
 export default quizDB;

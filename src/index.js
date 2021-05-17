@@ -36,6 +36,8 @@ const startSemaphore = new Semaphore(1);
 startSemaphore.take(() => {
 });
 
+var database;
+
 // Start app
 server.listen(serverConfig.port, async () => {
     LOGGER.info("[Main] App listening on port : " + serverConfig.port + " (mode: " + environment() + ")");
@@ -45,9 +47,9 @@ server.listen(serverConfig.port, async () => {
         const services = await initServices();
 
         // Database connection test
-        const db = new MongoDB();
+        database = new MongoDB();
         LOGGER.info("[Main] Testing the connection to the database");
-        await db.init();
+        await database.init();
         LOGGER.info("[Main] Connected successfully to the MongoDB database");
 
         // Set-up routes
@@ -68,7 +70,9 @@ server.listen(serverConfig.port, async () => {
     } catch (e) {
         LOGGER.exception(e);
         process.exit(1);
+    } finally {
+        console.log("================== end");
     }
 });
 
-export { server, startSemaphore };
+export { server, database, startSemaphore };
