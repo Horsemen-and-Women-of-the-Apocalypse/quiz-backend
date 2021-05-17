@@ -1,0 +1,64 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+      - "feature/*"
+  pull_request:
+    branches:
+      - "feature/*"
+
+env:
+  node-version: 12.13.1
+jobs:
+  # Lint checker UI job
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup NodeJS
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{env.node-version}}
+      - name: Install dependencies
+        run: npm install
+      - name: Run lint checker
+        run: npm run lint
+
+  # Build UI job
+  build:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup NodeJS
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{env.node-version}}
+      - name: Install dependencies
+        run: npm install
+      - name: Build Sources
+        run: npm run build-src
+      - name: Build Tests
+        run: npm run build-tests
+
+  # Test unit job
+  test-unit:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup NodeJS
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{env.node-version}}
+      - name: Install dependencies
+        run: npm install
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.4.0
+        with:
+          mongodb-version: 4.4
+      - name: Run tests
+        run: npm run test:ci
