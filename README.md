@@ -4,6 +4,10 @@
 
 * NodeJS (version: 12.13.1)
 
+### MongoDB database
+* Instance of MongoDB (Version: 4.4)
+* Creation of a user allowed to create and alter databases
+
 ## Set-up for development
 
 ### Install dependencies

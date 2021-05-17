@@ -11,5 +11,6 @@ LOGGER.info("[Config] Load configuration from: " + configPath);
 
 // Split config
 const server = config.server;
+const database = config.database;
 
-export { server };
+export { server, database };
