@@ -41,7 +41,7 @@ server.listen(serverConfig.port, async () => {
 
     try {
         // Init services here
-        const services = await initServices();
+        const services = await initServices(server);
 
         // Set-up routes
         initRoutes(app, services, path(__dirname, "router", "routes"));
