@@ -40,10 +40,10 @@ describe("QuizService", () => {
     };
 
     test("Should add a quiz to DataBase", async () => {
-
         let quizService = new QuizService(database);
 
         // Reset DataBase
+        await database.addDocument( quizObj , QuizService.getCollection() );
         await quizService.dropCollection();
         await quizService.createCollection();
 
@@ -58,6 +58,7 @@ describe("QuizService", () => {
         let quizService = new QuizService(database);
 
         // Reset DataBase
+        await database.addDocument( quizObj , QuizService.getCollection() );
         await quizService.dropCollection();
         await quizService.createCollection();
 
@@ -72,6 +73,7 @@ describe("QuizService", () => {
         let quizService = new QuizService(database);
 
         // Reset DataBase
+        await database.addDocument( quizObj , QuizService.getCollection() );
         await quizService.dropCollection();
         await quizService.createCollection();
 
