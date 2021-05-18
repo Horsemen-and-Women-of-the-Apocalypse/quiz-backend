@@ -37,6 +37,26 @@ class quizDB {
     }
 
     /**
+    * Drop collection
+    *
+    * @param collection String, collection to drop, Required
+    */
+    async dropCollection(collection) {
+        // TODO Sécurité pour drop la collection uniquement si elle existe déjà (renvoie actuellement une erreur dans ce cas)
+        await this.db.dropCollection(collection);
+    }
+
+    /**
+    * Create collection
+    *
+    * @param collection String, collection to create, Required
+    */
+    async createCollection(collection) {
+        // TODO Sécurité pour créer la collection uniquement si elle n'existe pas déjà (renvoie actuellement une erreur dans ce cas)
+        await this.db.createCollection(collection);
+    }
+
+    /**
     * Insert a document in a collection
     *
     * @param document object to add Required
