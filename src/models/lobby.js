@@ -1,6 +1,6 @@
 import { Player } from "./player";
 import { Quiz } from "./quiz";
-import { generateCurrentDate } from "../utils/dates";
+import { generateCurrentDate, isMoment } from "../utils/dates";
 
 /**
  * Lobby class
@@ -14,10 +14,11 @@ class Lobby {
      * @param {Player} owner Player owner of the game, only him can start the game
      * @param {Array<Player>} players Player of the game, the owner shouldn't be included
      * @param {Moment} startDate null by default, date of the start of the game if started
+     * @param {object} answersByPlayerId null by default, answers of the players
      * @param {Moment} endDate null by default, date of the end of the game if endend
      * @returns {Lobby}
      */
-    constructor(name, quiz, owner, players, startDate=null, endDate=null) {
+    constructor(name, quiz, owner, players, startDate = null, answersByPlayerId = {}, endDate = null) {
         if (typeof name !== "string") throw new Error("Expected a string for parameter 'name'");
         if (!name.length) throw new Error("The lobby name should not be empty");
 
@@ -31,6 +32,15 @@ class Lobby {
             if (players[i] === owner) throw new Error("The owner should not be included in the players");
         }
 
+        if (startDate && !isMoment(startDate)) throw new Error("Unexpected type for the startDate");
+
+        if (typeof answersByPlayerId !== "object") throw new Error("Expected an object for parameter 'answersByPlayerId'");
+        for (const prop in answersByPlayerId) {
+            if (typeof answersByPlayerId[prop] !== "object") throw new Error("Expected an object for the answersByPlayerId value");
+        }
+
+        if (endDate && !isMoment(endDate)) throw new Error("Unexpected type for the endDate");
+
         this._id = null; // generated at insertion
         this.name = name;
         this.quiz = quiz;
@@ -38,7 +48,7 @@ class Lobby {
         this.endDate = endDate;     // Moment object, to prevent late answers
         this.owner = owner;
         this._otherPlayers = players;
-        this.answersByPlayerId = [];
+        this.answersByPlayerId = answersByPlayerId;
     }
 
     /**

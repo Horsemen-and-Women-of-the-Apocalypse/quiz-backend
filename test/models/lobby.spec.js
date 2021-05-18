@@ -2,6 +2,7 @@ import { assert } from "chai";
 import { describe, it } from "mocha";
 import { Quiz } from "../../src/models/quiz";
 import { StringMultipleChoiceQuestion } from "../../src/models/question";
+import { generateCurrentDate } from "../../src/utils/dates";
 
 import { Player } from "../../src/models/player";
 import { Lobby } from "../../src/models/lobby";
@@ -32,15 +33,23 @@ function createQuiz() {
     return new Quiz("Some random quiz", [ q1, q2, q3 ]);
 }
 
-const lobbyName = "The best lobby";
-const q = createQuiz();
-
-const p1 = new Player("toto");
-const p2 = new Player("tata");
-const l = new Lobby(lobbyName, q, p1, [ p2 ]);
 
 describe("Lobby", () => {
     describe("#Constructor", () => {
+        const lobbyName = "The best lobby";
+        const q = createQuiz();
+
+        const p1 = new Player("toto");
+        const p2 = new Player("tata");
+
+        const dateStart = generateCurrentDate();
+        const dateEnd = generateCurrentDate();
+
+        const l = new Lobby(lobbyName, q, p1, [ p2 ], dateStart, { "toto": {} }, dateEnd);
+
+        // It should work for a new lobby
+        new Lobby(lobbyName, q, p1, []);
+
         it("Should be initialized properly", () => {
             assert.equal(l.quiz, q);
             assert.equal(l.name, lobbyName);
@@ -85,9 +94,32 @@ describe("Lobby", () => {
                     new Lobby(lobbyName, q, p1, [ p2, "THE SUS PLAYER" ]);
                 }, Error, "Unexpected type in 'players' array");
             });
+            it("# dates", () => {
+                assert.throws(() => {
+                    new Lobby(lobbyName, q, p1, [ p2 ], "not a date");
+                }, Error, "Unexpected type for the startDate");
+                assert.throws(() => {
+                    new Lobby(lobbyName, q, p1, [ p2 ], generateCurrentDate(), {}, "not a date");
+                }, Error, "Unexpected type for the endDate");
+            });
+            it("# answersByPlayerId", () => {
+                assert.throws(() => {
+                    new Lobby(lobbyName, q, p1, [ p2 ], generateCurrentDate(), "not obj");
+                }, Error, "Expected an object for parameter 'answersByPlayerId'");
+                assert.throws(() => {
+                    new Lobby(lobbyName, q, p1, [ p2 ], generateCurrentDate(), { "toto" : "not obj" });
+                }, Error, "Expected an object for the answersByPlayerId value");
+            });
         });
     });
     describe("#Start & end", () => {
+        const lobbyName = "The best lobby";
+        const q = createQuiz();
+
+        const p1 = new Player("toto");
+
+        const l = new Lobby(lobbyName, q, p1, []);
+
         it("Should set a date on start and on end", () => {
             assert.isNull(l.startDate);
             assert.isNull(l.endDate);

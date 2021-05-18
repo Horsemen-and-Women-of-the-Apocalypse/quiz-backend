@@ -7,6 +7,14 @@ import moment from "moment";
 function generateCurrentDate() {
     return moment();
 }
+/**
+ * Is a moment object
+ * @param {object} obj the moment date to convert
+ * @returns {boolean}
+ */
+function isMoment(obj) {
+    return moment.isMoment(obj);
+}
 
 /**
  * Convert a moment date to a database string format
@@ -28,4 +36,9 @@ function convertTimestampToMoment(timestamp) {
     return moment.unix(timestamp);
 }
 
-export { generateCurrentDate, convertMomentToTimestamp, convertTimestampToMoment };
+export {
+    generateCurrentDate,
+    isMoment,
+    convertMomentToTimestamp,
+    convertTimestampToMoment
+};
