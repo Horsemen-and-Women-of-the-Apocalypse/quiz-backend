@@ -16,6 +16,85 @@ describe("Question", () => {
             assert.sameDeepMembers(testQuestion.choices, obj.choices);
             assert.equal(testQuestion.solutionIndex, obj.solutionIndex);
         });
+
+        describe("", () => {
+            it("#string expected for 'question'", () => {
+                assert.throws(() => {
+                    try {
+                        const dont = new StringMultipleChoiceQuestion(12, [ "12", "12" ], 0);
+                        dont.isAnswer(12);
+                    } catch (err) {
+                        throw(err);
+                    }
+                }, Error, "Expected a string for parameter 'question'");
+            });
+        });
+
+        it("#'choices' must contain at least 2 elements", () => {
+            assert.throws(() => {
+                try {
+                    const dont = new StringMultipleChoiceQuestion("12?", [ "12" ], 0);
+                    dont.isAnswer(12);
+                } catch (err) {
+                    throw(err);
+                }
+            }, Error, "'choices' must contain at least 2 elements");
+        });
+
+        it("'Choices' must contain strings", () => {
+            assert.throws(() => {
+                try {
+                    const dont = new StringMultipleChoiceQuestion("12?", [ 12, 12, 12 ], 0);
+                    dont.isAnswer(12);
+                } catch (err) {
+                    throw(err);
+                }
+            }, Error, "'Choices' must contain strings");
+        });
+
+        it("#Expected an array for parameter 'choices'", () => {
+            assert.throws(() => {
+                try {
+                    const dont = new StringMultipleChoiceQuestion("12?", 12, 0);
+                    dont.isAnswer(12);
+                } catch (err) {
+                    throw(err);
+                }
+            }, Error, "Expected an array for parameter 'choices'");
+        });
+
+        it("#Wrong value of 'solutionIndex'", () => {
+            assert.throws(() => {
+                try {
+                    const dont = new StringMultipleChoiceQuestion("12?", [ "12", "douze" ], 12);
+                    dont.isAnswer(12);
+                } catch (err) {
+                    throw(err);
+                }
+            }, Error, "Wrong value of 'solutionIndex'");
+        });
+
+        it("#Expected an integer for parameter 'solutionIndex' (1)", () => {
+            assert.throws(() => {
+                try {
+                    const dont = new StringMultipleChoiceQuestion("12?", [ "12", "douze" ], 12.12);
+                    dont.isAnswer(12);
+                } catch (err) {
+                    throw(err);
+                }
+            }, Error, "Expected an integer for parameter 'solutionIndex'");
+        });
+
+        it("#Expected an integer for parameter 'solutionIndex' (2)", () => {
+            assert.throws(() => {
+                try {
+                    const dont = new StringMultipleChoiceQuestion("12?", [ "12", "douze" ], "12.12");
+                    dont.isAnswer(12);
+                } catch (err) {
+                    throw(err);
+                }
+            }, Error, "Expected an integer for parameter 'solutionIndex'");
+        });
     });
 
     describe("#IsAnswer", () => {
