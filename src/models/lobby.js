@@ -36,7 +36,7 @@ class Lobby {
 
         if (typeof answersByPlayerId !== "object") throw new Error("Expected an object for parameter 'answersByPlayerId'");
         for (const prop in answersByPlayerId) {
-            if (typeof answersByPlayerId[prop] !== "object") throw new Error("Expected an object for the answersByPlayerId value");
+            if (!Array.isArray(answersByPlayerId[prop])) throw new Error("Expected an array for the answersByPlayerId value");
         }
 
         if (endDate && !isMoment(endDate)) throw new Error("Unexpected type for the endDate");

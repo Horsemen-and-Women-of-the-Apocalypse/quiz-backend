@@ -45,7 +45,7 @@ describe("Lobby", () => {
         const dateStart = generateCurrentDate();
         const dateEnd = generateCurrentDate();
 
-        const l = new Lobby(lobbyName, q, p1, [ p2 ], dateStart, { "toto": {} }, dateEnd);
+        const l = new Lobby(lobbyName, q, p1, [ p2 ], dateStart, { "toto": [] }, dateEnd);
 
         // It should work for a new lobby
         new Lobby(lobbyName, q, p1, []);
@@ -107,8 +107,8 @@ describe("Lobby", () => {
                     new Lobby(lobbyName, q, p1, [ p2 ], generateCurrentDate(), "not obj");
                 }, Error, "Expected an object for parameter 'answersByPlayerId'");
                 assert.throws(() => {
-                    new Lobby(lobbyName, q, p1, [ p2 ], generateCurrentDate(), { "toto" : "not obj" });
-                }, Error, "Expected an object for the answersByPlayerId value");
+                    new Lobby(lobbyName, q, p1, [ p2 ], generateCurrentDate(), { "toto" : "not an arr" });
+                }, Error, "Expected an array for the answersByPlayerId value");
             });
         });
     });
