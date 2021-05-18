@@ -14,7 +14,7 @@ class QuizService {
     /**
      * Retrieve all quizzes
      * 
-     * @return Array<Quiz>
+     * @return {Array<Quiz>}
      *  */ 
     async allQuizzes() {
         let quizzes = await this.database.getAllDocumentsFromCollection(QuizService.getCollection());
@@ -25,14 +25,19 @@ class QuizService {
      * Return the correct quiz
      * 
      * @param ObjectId Int, integer which point on the chosen quiz, Required
-     * @return Quiz
+     * @return {Quiz}, or null if there is no occurence
      *  */ 
     async findById(ObjectId) {
-        return (await this.database.db.collection(QuizService.getCollection()).findOne({ "_id":ObjectId }));
+        let q = (await this.database.db.collection(QuizService.getCollection()).findOne({ "_id":ObjectId }));
+        if(!(q === null)) {
+            return new Quiz(q._name, q._questions.map(ques => new StringMultipleChoiceQuestion(ques._question, ques._choices, ques._solutionIndex)));
+        } else {
+            return null;
+        }
     }
 
     /**
-     * Return the DB collection of quiz
+     * Return the DB collection of quizzes
      * 
      * @return Quiz
      *  */ 
@@ -41,7 +46,7 @@ class QuizService {
     }
 
     /**
-     * Drop the DB collection of quiz
+     * Drop the DB collection of quizzes
      * 
      *  */
     async dropCollection () {
