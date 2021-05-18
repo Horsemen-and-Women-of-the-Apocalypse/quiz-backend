@@ -50,18 +50,6 @@ class quizDB {
     }
 
     /**
-    * Create collection
-    *
-    * @param collection String, collection to create, Required
-    */
-    async createCollection(collection) {
-        let collectionsCursor = await this.db.listCollections();
-        if ((await collectionsCursor.toArray()).indexOf(collection) < 0) {
-            await this.db.createCollection(collection);
-        }
-    }
-
-    /**
     * Insert a document in a collection
     *
     * @param document object to add Required
