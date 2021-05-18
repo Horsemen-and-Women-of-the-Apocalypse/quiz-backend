@@ -9,7 +9,6 @@ import initServices from "./services";
 import { LOGGER, path } from "./utils";
 import { DEVELOPMENT_MODE, environment } from "./utils/node";
 import MongoDB from "./services/db/db";
-import QuizService from "./services/quiz/QuizService";
 
 // Create application & websocket
 const app = express();
@@ -44,17 +43,14 @@ server.listen(serverConfig.port, async () => {
     LOGGER.info("[Main] App listening on port : " + serverConfig.port + " (mode: " + environment() + ")");
 
     try {
-        // Init services here
-        const services = await initServices(server);
-
         // Database connection test
         database = new MongoDB();
         LOGGER.info("[Main] Testing the connection to the database");
         await database.init();
         LOGGER.info("[Main] Connected successfully to the MongoDB database");
 
-        // Quiz service
-        quizService = new QuizService(database);
+        // Init services here
+        const services = await initServices(server,database);
 
         // Set-up routes
         initRoutes(app, services, path(__dirname, "router", "routes"));
