@@ -38,10 +38,6 @@ class QuizService {
     async dropCollection () {
         return await this.database.dropCollection(QuizService.getCollection());
     }
-    
-    async createCollection () {
-        return await this.database.createCollection(QuizService.getCollection());
-    }
 
 }
 

@@ -43,44 +43,37 @@ describe("QuizService", () => {
         let quizService = new QuizService(database);
 
         // Reset DataBase
-        await database.addDocument( quizObj , QuizService.getCollection() );
         await quizService.dropCollection();
-        await quizService.createCollection();
 
-        await database.addDocument( quizObj , QuizService.getCollection() );
+        await database.addDocument(quizObj, QuizService.getCollection());
         let quizzes = await quizService.allQuizzes();
 
         delete quizObj._id;
 
         assert.deepEqual(quizzes[0], quizObj);
     });
+
     test("Should find a quiz in DataBase which matches the id", async () => {
         let quizService = new QuizService(database);
 
         // Reset DataBase
-        await database.addDocument( quizObj , QuizService.getCollection() );
         await quizService.dropCollection();
-        await quizService.createCollection();
 
-        await database.addDocument( quizObj , QuizService.getCollection() );
-        await database.addDocument( quizObj2 , QuizService.getCollection() );
+        await database.addDocument(quizObj, QuizService.getCollection());
+        await database.addDocument(quizObj2, QuizService.getCollection());
         
         let quiz = await quizService.findById(quizObj2._id);
 
         assert.deepEqual(quiz, quizObj2);
     });
+
     test("Sould not find any quizzes in DataBase which matches the id", async () => {
         let quizService = new QuizService(database);
 
         // Reset DataBase
-        await database.addDocument( quizObj , QuizService.getCollection() );
         await quizService.dropCollection();
-        await quizService.createCollection();
-
-        await database.addDocument( quizObj , QuizService.getCollection() );
-        let id2 = await database.addDocument( quizObj2 , QuizService.getCollection() );
         
-        let quiz = await quizService.findById(id2 + 54621852);
+        let quiz = await quizService.findById();
 
         assert.deepEqual(quiz, null);
     });

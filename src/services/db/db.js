@@ -42,8 +42,10 @@ class quizDB {
     * @param collection String, collection to drop, Required
     */
     async dropCollection(collection) {
-        // TODO Sécurité pour drop la collection uniquement si elle existe déjà (renvoie actuellement une erreur dans ce cas)
-        await this.db.dropCollection(collection);
+        let collectionsCursor = await this.db.listCollections();
+        if( (await collectionsCursor.toArray()).indexOf(collection) >= 0 ){
+            await this.db.dropCollection(collection);
+        }  
     }
 
     /**
@@ -52,8 +54,10 @@ class quizDB {
     * @param collection String, collection to create, Required
     */
     async createCollection(collection) {
-        // TODO Sécurité pour créer la collection uniquement si elle n'existe pas déjà (renvoie actuellement une erreur dans ce cas)
-        await this.db.createCollection(collection);
+        let collectionsCursor = await this.db.listCollections();
+        if( (await collectionsCursor.toArray()).indexOf(collection) < 0 ){
+            await this.db.createCollection(collection);
+        } 
     }
 
     /**
