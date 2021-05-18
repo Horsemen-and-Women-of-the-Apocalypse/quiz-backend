@@ -1,11 +1,10 @@
+import { Player } from "./player";
+import { Quiz } from "./quiz";
+import { generateCurrentDate } from "../utils/dates";
+
 /**
  * Lobby class
  */
-
-import moment from "moment";
-import { Player } from "./player";
-import { Quiz } from "./quiz";
-
 class Lobby {
     /**
      * New quiz
@@ -14,10 +13,11 @@ class Lobby {
      * @param {Quiz} quiz The quiz the players will play on
      * @param {Player} owner Player owner of the game, only him can start the game
      * @param {Array<Player>} players Player of the game, the owner shouldn't be included
+     * @param {Moment} startDate null by default, date of the start of the game if started
+     * @param {Moment} endDate null by default, date of the end of the game if endend
      * @returns {Lobby}
      */
-    constructor(name, quiz, owner, players) {
-
+    constructor(name, quiz, owner, players, startDate=null, endDate=null) {
         if (typeof name !== "string") throw new Error("Expected a string for parameter 'name'");
         if (!name.length) throw new Error("The lobby name should not be empty");
 
@@ -34,8 +34,8 @@ class Lobby {
         this._id = null; // generated at insertion
         this.name = name;
         this.quiz = quiz;
-        this.startDate = null; // start date, to prevent early answers
-        this.endDate = null; // end date, to prevent late answers
+        this.startDate = startDate; // Moment object, to prevent early answers
+        this.endDate = endDate;     // Moment object, to prevent late answers
         this.owner = owner;
         this._otherPlayers = players;
         this.answersByPlayerId = [];
@@ -45,6 +45,10 @@ class Lobby {
      * Get identifier
      */
     get id() { return this._id; }
+    /**
+     * Get all the lobby players
+     * @returns {Array<Player>} the inserted players and the owner in one array
+     */
     get players() { return [ this.owner, ...this._otherPlayers ]; }
 
     /**
@@ -56,14 +60,18 @@ class Lobby {
      * Start the lobby
      */
     start() {
-        this.startDate = moment().format("MMMM Do YYYY, h:mm:ss a");
+        if (this.startDate !== null) throw new Error("The lobby has already started");
+
+        this.startDate = generateCurrentDate();
     }
 
     /**
      * End the lobby
      */
     end() {
-        this.endDate = moment().format("MMMM Do YYYY, h:mm:ss a");
+        if (this.endDate !== null) throw new Error("The lobby has already ended");
+
+        this.endDate = generateCurrentDate();
     }
 }
 
