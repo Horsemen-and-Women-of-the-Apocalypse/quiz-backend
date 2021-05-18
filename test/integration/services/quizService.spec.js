@@ -3,7 +3,6 @@ import { describe, test } from "mocha";
 import { StringMultipleChoiceQuestion } from "../../../src/models/question";
 import QuizService from "../../../src/services/quiz/QuizService";
 import { database } from "../../../src";
-import { Quiz } from "../../../src/models/quiz";
 import { createQuiz } from "../../common/utils";
 
 // A besoin que la collection des quiz soit déjà créée dans la BDD
@@ -90,10 +89,11 @@ describe("QuizService", () => {
         await quizService.dropCollection();
 
         // Add quiz in DB
-        let returnId = await quizService.addQuiz(quiz)
+        let returnId = await quizService.addQuiz(quiz);
 
         let quizFound = await quizService.findById(returnId);
         delete quiz._id;
+        
         assert.deepEqual(quiz, quizFound);
     });
 });
