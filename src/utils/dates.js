@@ -14,7 +14,7 @@ function generateCurrentDate() {
  * @returns {number} timestamp date at the unix timestamp format
  */
 function convertMomentToTimestamp(momentDate) {
-    if (!(momentDate instanceof moment.Moment)) throw new Error("Unexpected type for the date");
+    if (!moment.isMoment(momentDate)) throw new Error("Unexpected type for the date");
     return momentDate.unix();
 }
 
@@ -24,8 +24,7 @@ function convertMomentToTimestamp(momentDate) {
  * @returns {moment} at the unix timestamp format
  */
 function convertTimestampToMoment(timestamp) {
-    if (typeof timestamp !== "number") throw new Error("Expected a string for the strDate");
-
+    if (typeof timestamp !== "number") throw new Error("Expected a timestamp for the strDate");
     return moment.unix(timestamp);
 }
 
