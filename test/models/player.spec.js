@@ -2,7 +2,7 @@ import { assert } from "chai";
 import { describe, it } from "mocha";
 import { Player } from "../../src/models/player";
 
-describe("Lobby", () => {
+describe("Player", () => {
     describe("#Constructor", () => {
 
         it("Should be initialized properly", () => {
