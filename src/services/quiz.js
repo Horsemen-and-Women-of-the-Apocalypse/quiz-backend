@@ -1,3 +1,4 @@
+import { StringMultipleChoiceQuestion } from "../models/question";
 import { Quiz } from "../models/quiz";
 
 /**
@@ -16,16 +17,32 @@ class QuizService {
 
     /**
      * Return all quizzes saved in the database
-     * 
+     *
      * @return {Promise<[{id: number, name: string}]>} Array of quizzes
      */
     async getAllQuizzes() {
-        return (await this.quizDbService.allQuizzes()).map((item) => { 
-            return { 
-                "id": item._id, 
-                "name": item._name 
-            }; 
+        return (await this.quizDbService.allQuizzes()).map((item) => {
+            return {
+                "id": item._id,
+                "name": item._name
+            };
         });
+    }
+
+    /**
+     * Create a quiz based on a creation request
+     *
+     * @param request Creation request
+     * @return {Promise<string>} Promise containing quiz's id
+     */
+    async create(request) {
+        // Check request
+        if (!Array.isArray(request.questions)) {
+            throw new Error("Malformed questions");
+        }
+
+        // Save quiz
+        return this.quizDbService.addQuiz(new Quiz(request.name, request.questions.map(q => new StringMultipleChoiceQuestion(q.question, q.choices, q.solutionIndex))));
     }
 
     /**
@@ -33,7 +50,7 @@ class QuizService {
      *
      * @param quizId Quiz's id
      * @param request User's answers request
-     * @return {Promise<{score: number, maxScore, fails: *[]}>} Results
+     * @return {Promise<{score: number, maxScore, fails: *[]}>} Promise containing results
      */
     async checkResults(quizId, request) {
         // Check answers
