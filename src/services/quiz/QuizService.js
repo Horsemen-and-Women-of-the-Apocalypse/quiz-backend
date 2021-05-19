@@ -29,7 +29,6 @@ class QuizService {
             allQuizzes.forEach(quiz => {
                 this.addQuiz(quiz);
             });       
-            console.log(await this.allQuizzes());
         }
     }
 
