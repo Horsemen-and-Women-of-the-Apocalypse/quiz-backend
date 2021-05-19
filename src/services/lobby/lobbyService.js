@@ -56,7 +56,10 @@ class LobbyService {
             let endDate = l.endDate === undefined ? null : l.endDate;
 
             // Create the lobby
-            ret.push(new Lobby(l.name, quiz, owner, players, startDate, answersByPlayerId, endDate));
+            const newLobby = new Lobby(l.name, quiz, owner, players, startDate, answersByPlayerId, endDate);
+            newLobby.id = l._id.toString();
+            ret.push(newLobby);
+
         }
         return ret;
     }
@@ -80,8 +83,8 @@ class LobbyService {
         };
 
         let lobbyId = await this.database.addDocument(lobbyObjToAdd, LobbyService.getCollection());
-        lobby.id = lobbyId;
-        return lobbyId;
+        lobby.id = lobbyId.toString();
+        return lobby.id;
     }
 
 
