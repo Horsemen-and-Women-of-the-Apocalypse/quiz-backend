@@ -1,5 +1,5 @@
 import { assert } from "chai";
-import { describe, test } from "mocha";
+import { describe, test, beforeEach } from "mocha";
 import LobbyDbService from "../../../src/services/db/lobbyDbService";
 import QuizService from "../../../src/services/quiz/QuizService";
 import { database } from "../../../src";
@@ -7,15 +7,20 @@ import { createLobby } from "../../common/utils";
 import { Lobby } from "../../../src/models/lobby";
 import { Player } from "../../../src/models/player";
 import { isMoment } from "../../../src/utils/dates";
+import { ObjectID } from "mongodb";
+
+let quizService;
+let lobbyDbService;
 
 describe("LobbyDbService", () => {
+    beforeEach(async ()=>{
+        quizService = new QuizService(database);
+        await quizService.dropCollection();
+        lobbyDbService = new LobbyDbService(database, quizService);
+        await lobbyDbService.dropCollection();
+    });
 
     test("Should add and load lobby from the DataBase", async () => {
-        const quizService = new QuizService(database);
-        await quizService.dropCollection();
-        const lobbyDbService = new LobbyDbService(database, quizService);
-        await lobbyDbService.dropCollection();
-
         const l1 = createLobby();
         const l2 = createLobby();
         const l3 = createLobby();
@@ -26,7 +31,7 @@ describe("LobbyDbService", () => {
 
         // Lobby insertion
         let allLobby = await lobbyDbService.getAllLobby();
-        assert.equal(allLobby.length, 0);
+        assert.isEmpty(allLobby);
 
         assert.isNull(l1.id);
         let newId = await lobbyDbService.addLobby(l1);
@@ -36,7 +41,7 @@ describe("LobbyDbService", () => {
         // Load and test the inserted lobby
         allLobby = await lobbyDbService.getAllLobby();
         assert.equal(allLobby.length, 1);
-        assert.isTrue(allLobby[0] instanceof Lobby);
+        assert.instanceOf(allLobby[0], Lobby);
         assert.equal(l1._id, allLobby[0]._id);
 
 
@@ -51,11 +56,6 @@ describe("LobbyDbService", () => {
         assert.equal(allLobby.length, 3);
     });
     test("Should be able to find by ID", async () => {
-        const quizService = new QuizService(database);
-        await quizService.dropCollection();
-        const lobbyDbService = new LobbyDbService(database, quizService);
-        await lobbyDbService.dropCollection();
-
         const l1 = createLobby();
         await quizService.addQuiz(l1.quiz);
 
@@ -64,15 +64,13 @@ describe("LobbyDbService", () => {
 
         // Find by id
         let myLobby = await lobbyDbService.findById(newId);
-        assert.isTrue(myLobby instanceof Lobby);
+        assert.instanceOf(myLobby, Lobby);
         assert.equal(l1.id, myLobby.id);
+
+        // Find of something that doesn't exist
+        assert.isNull(await lobbyDbService.findById(new ObjectID()));
     });
     test("Should be able to start and end", async () => {
-        const quizService = new QuizService(database);
-        await quizService.dropCollection();
-        const lobbyDbService = new LobbyDbService(database, quizService);
-        await lobbyDbService.dropCollection();
-
         const l1 = createLobby();
         await quizService.addQuiz(l1.quiz);
 
@@ -109,11 +107,6 @@ describe("LobbyDbService", () => {
 
     });
     test("Players Should be able to join", async () => {
-        const quizService = new QuizService(database);
-        await quizService.dropCollection();
-        const lobbyDbService = new LobbyDbService(database, quizService);
-        await lobbyDbService.dropCollection();
-
         const l1 = createLobby();
         await quizService.addQuiz(l1.quiz);
 
@@ -123,20 +116,15 @@ describe("LobbyDbService", () => {
         // Add player lobby
         let p1 = new Player("momo");
         l1.addPlayer(p1);
-        await lobbyDbService.updateLobyPlayers(l1, p1);
+        await lobbyDbService.addPlayersToLobby(l1, p1);
 
         // Find altered lobby
         let myLobby = await lobbyDbService.findById(l1.id);
         let myPlayer = myLobby.players.find(p => p.id === p1.id);
-        assert.isTrue(myPlayer instanceof Player);
+        assert.instanceOf(myPlayer, Player);
         assert.equal(myPlayer.id, p1.id);
     });
     test("Players Should be able to add answers", async () => {
-        const quizService = new QuizService(database);
-        await quizService.dropCollection();
-        const lobbyDbService = new LobbyDbService(database, quizService);
-        await lobbyDbService.dropCollection();
-
         const l1 = createLobby();
         await quizService.addQuiz(l1.quiz);
 

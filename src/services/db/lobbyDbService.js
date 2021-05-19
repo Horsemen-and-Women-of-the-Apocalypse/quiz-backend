@@ -118,7 +118,7 @@ class LobbyDbService {
      * @param {Lobby} lobby
      * @param {Player} player
      *  */
-    async updateLobyPlayers(lobby, player) {
+    async addPlayersToLobby(lobby, player) {
         if (!(lobby instanceof Lobby)) throw new Error("Unexpected type for the lobby");
         this.database.pushToDocument("otherPlayers", { name: player.name, id: player.id }, lobby.id, LobbyDbService.getCollection());
     }
