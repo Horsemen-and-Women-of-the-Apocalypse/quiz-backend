@@ -1,7 +1,7 @@
 import { assert } from "chai";
 import { describe, test, beforeEach } from "mocha";
 import LobbyDbService from "../../../src/services/db/lobbyDbService";
-import QuizService from "../../../src/services/quiz/QuizService";
+import QuizService from "../../../src/services/db/quiz";
 import { database } from "../../../src";
 import { createLobby } from "../../common/utils";
 import { Lobby } from "../../../src/models/lobby";
