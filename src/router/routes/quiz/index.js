@@ -22,8 +22,6 @@ const questions = async (services, request, response, next) => {
         // Get all questions
         const questions = await services.quizService.getQuizQuestions(quizId);
         
-        console.log(questions);
-
         // Send questions
         response.json(new Response(questions));
     } catch(e) {
