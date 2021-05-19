@@ -6,7 +6,7 @@ import { StringMultipleChoiceQuestion } from "../../../src/models/question";
 import { Quiz } from "../../../src/models/quiz";
 import QuizDatabaseService from "../../../src/services/db/quiz";
 import { parseJSONResponse } from "../../test-utils/http";
-import { QUIZ_LIST_ROUTE, QUIZ_ANSWER_ROUTE, SERVER_URL } from "../../test-utils/server";
+import { QUIZ_LIST_ROUTE, QUIZ_QUESTIONS_ROUTE, QUIZ_ANSWER_ROUTE, SERVER_URL } from "../../test-utils/server";
 
 const quiz = new Quiz("Test", [
     new StringMultipleChoiceQuestion("A", [ "A", "B", "C" ], 0),
@@ -29,10 +29,31 @@ describe("API", () => {
         it("Should return all quizzes", async () => {
             const service = new QuizDatabaseService(database);
 
-            let response = await chai.request(SERVER_URL).get(QUIZ_LIST_ROUTE);
+            const response = await chai.request(SERVER_URL).get(QUIZ_LIST_ROUTE);
 
             chai.assert.equal(response.status, 200);
             chai.assert.sameDeepMembers(parseJSONResponse(response).data, (await service.allQuizzes()).map((item) => { return { "id": item["_id"], "name": item["_name"] }; }));
+        });
+    });
+
+    describe("/quiz/:id/questions", () => {
+        it("Return an error because unknown quiz", async () => {
+            const response = await chai.request(SERVER_URL).get(QUIZ_QUESTIONS_ROUTE(new ObjectID().toString()));
+
+            chai.assert.equal(response.status, 500);
+        });
+
+        it("Return all questions", async () => {
+            const response = await chai.request(SERVER_URL).get(QUIZ_QUESTIONS_ROUTE(quizId));
+            const expectedQuestions = quiz.questions.map(item => {
+                return {
+                    "question": item.question,
+                    "choices": item.choices
+                };
+            });
+
+            chai.assert.equal(response.status, 200);
+            chai.assert.sameDeepMembers(parseJSONResponse(response).data, expectedQuestions);
         });
     });
 
