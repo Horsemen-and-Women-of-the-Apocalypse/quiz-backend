@@ -56,6 +56,6 @@ const answer = async (services, request, response, next) => {
 };
 
 export default {
-    "quiz-list": new Route(route => route + "/list", "get", list),
+    "list": new Route(route => route + "/list", "get", list),
     "answer": new Route(route => route + "/:id/answer", "post", answer)
 };
