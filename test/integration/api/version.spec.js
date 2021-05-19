@@ -1,8 +1,8 @@
 import chai from "chai";
 import fs from "fs";
 import { describe, it } from "mocha";
-import { parseJSONResponse } from "../test-utils/http";
-import { SERVER_URL, VERSION_ROUTE } from "../test-utils/server";
+import { parseJSONResponse } from "../../test-utils/http";
+import { SERVER_URL, VERSION_ROUTE } from "../../test-utils/server";
 
 const projectPackage = JSON.parse(fs.readFileSync("./package.json", "UTF-8"));
 

@@ -8,15 +8,15 @@ class Question {
 class StringMultipleChoiceQuestion extends Question {
     constructor(question, choices, solutionIndex) {
         super();
-        if(typeof question !== "string") {
+        if (typeof question !== "string") {
             throw new Error("Expected a string for parameter 'question'");
         }
 
-        if(Array.isArray(choices)) {
-            if(choices.length < 2) {
+        if (Array.isArray(choices)) {
+            if (choices.length < 2) {
                 throw new Error("'choices' must contain at least 2 elements");
             } else {
-                for (let i = 0; i < choices.length; i ++) {
+                for (let i = 0; i < choices.length; i++) {
                     if (typeof choices[i] !== "string") {
                         throw new Error("'Choices' must contain strings");
                     }
@@ -28,7 +28,7 @@ class StringMultipleChoiceQuestion extends Question {
 
         if (typeof solutionIndex === "number") {
             if (Number.isInteger(solutionIndex)) {
-                if(solutionIndex < 0 || solutionIndex > choices.length) {
+                if (solutionIndex < 0 || solutionIndex > choices.length) {
                     throw new Error("Wrong value of 'solutionIndex'");
                 }
             } else {
@@ -45,13 +45,13 @@ class StringMultipleChoiceQuestion extends Question {
 
     /**
      * Check the answer
-     * 
-     * @param {int} answer User answer index 
-     * @returns 
+     *
+     * @param {Object} answer User answer
+     * @returns
      */
     isAnswer(answer) {
         // XXX: If there are several user choices and solution indexes, they need to be sorted first
-        return answer === this._solutionIndex;
+        return answer === this._choices[this._solutionIndex];
     }
 
     /**
@@ -73,6 +73,15 @@ class StringMultipleChoiceQuestion extends Question {
      */
     get solutionIndex() {
         return this._solutionIndex;
+    }
+
+    /**
+     * Get solution
+     *
+     * @return {String} Solution
+     */
+    get solution() {
+        return this._choices[this._solutionIndex];
     }
 }
 

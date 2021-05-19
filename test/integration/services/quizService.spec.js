@@ -1,8 +1,9 @@
 import { assert } from "chai";
 import { describe, test } from "mocha";
-import { StringMultipleChoiceQuestion } from "../../../src/models/question";
-import QuizService from "../../../src/services/db/quiz";
 import { database } from "../../../src";
+import { StringMultipleChoiceQuestion } from "../../../src/models/question";
+import { Quiz } from "../../../src/models/quiz";
+import QuizService from "../../../src/services/db/quiz";
 
 // A besoin que la collection des quiz soit déjà créée dans la BDD
 describe("QuizService", () => {
@@ -29,15 +30,8 @@ describe("QuizService", () => {
     const q2 = new StringMultipleChoiceQuestion(obj2.question, obj2.choices, obj2.solutionIndex);
     const q3 = new StringMultipleChoiceQuestion(obj3.question, obj3.choices, obj3.solutionIndex);
 
-    const quizObj = {
-        _name: "Some random quiz",
-        _questions: [ q1, q2, q3 ]
-    };
-
-    const quizObj2 = {
-        _name: "Some random quiz 2",
-        _questions: [ q1, q2, q3 ]
-    };
+    const quizObj = new Quiz("Some random quiz", [ q1, q2, q3 ]);
+    const quizObj2 = new Quiz("Some random quiz 2", [ q1, q2, q3 ]);
 
     test("Should add a quiz to DataBase", async () => {
         let quizService = new QuizService(database);
@@ -45,11 +39,11 @@ describe("QuizService", () => {
         // Reset DataBase
         await quizService.dropCollection();
 
-        await database.addDocument(quizObj, QuizService.getCollection());
+        await quizService.addQuiz(quizObj);
         let quizzes = await quizService.allQuizzes();
 
         delete quizObj._id;
-
+        delete quizzes[0]._id;
         assert.deepEqual(quizzes[0], quizObj);
     });
 
@@ -59,11 +53,15 @@ describe("QuizService", () => {
         // Reset DataBase
         await quizService.dropCollection();
 
+        delete quizObj._id;
+        delete quizObj2._id;
         await database.addDocument(quizObj, QuizService.getCollection());
         await database.addDocument(quizObj2, QuizService.getCollection());
 
         let quiz = await quizService.findById(quizObj2._id);
 
+        delete quiz._id;
+        delete quizObj2._id;
         assert.deepEqual(quiz, quizObj2);
     });
 

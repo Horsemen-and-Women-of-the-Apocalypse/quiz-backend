@@ -1,4 +1,5 @@
-import QuizdbService from "./db/quiz";
+import QuizDatabaseService from "./db/quiz";
+import QuizService from "./quiz";
 import WebsocketService from "./ws";
 
 /**
@@ -8,10 +9,12 @@ class ServiceContainer {
     /**
      * Constructor
      * @param ws {WebsocketService} Websocket service
+     * @param quizDbService {QuizDatabaseService} Quiz database service
      * @param quizService {QuizService} Quiz service
      */
-    constructor(ws, quizService) {
+    constructor(ws, quizDbService, quizService) {
         this._ws = ws;
+        this._quizDbService = quizDbService;
         this._quizService = quizService;
     }
 
@@ -25,9 +28,18 @@ class ServiceContainer {
     }
 
     /**
+     * Get quiz database service
+     *
+     * @return {QuizDatabaseService} Quiz database service
+     */
+    get quizDbService() {
+        return this._quizDbService;
+    }
+
+    /**
      * Get quiz service
      *
-     * @return {QuizService} Service
+     * @return {QuizService} Quiz service
      */
     get quizService() {
         return this._quizService;
@@ -38,6 +50,7 @@ class ServiceContainer {
  * Init services container
  *
  * @param {Server} server HTTP server
+ * @param database Database service
  * @return {Promise<ServiceContainer>} Services container
  */
 const init = async (server, database) => {
@@ -46,9 +59,10 @@ const init = async (server, database) => {
     ws.init(server);
 
     // Quiz service
-    const quizService = new QuizdbService(database);
+    const quizdbService = new QuizDatabaseService(database);
+    const quizService = new QuizService(quizdbService);
 
-    return new ServiceContainer(ws, quizService);
+    return new ServiceContainer(ws, quizdbService, quizService);
 };
 
 export default init;

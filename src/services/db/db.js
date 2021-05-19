@@ -22,11 +22,11 @@ class DatabaseService {
     }
 
     /**
-    * Get all documents from a collection
-    *
-    * @param collection String, collection to get the documents from, Required
-    * @return {Promise<Array<object>}
-    */
+     * Get all documents from a collection
+     *
+     * @param collection String, collection to get the documents from, Required
+     * @return {Promise<Array<object>}
+     */
     async getAllDocumentsFromCollection(collection) {
         const collec = this.db.collection(collection);
         const cursor = collec.find();
@@ -37,37 +37,38 @@ class DatabaseService {
     }
 
     /**
-    * Drop collection
-    *
-    * @param collection String, collection to drop, Required
-    */
+     * Drop collection
+     *
+     * @param collection String, collection to drop, Required
+     */
     async dropCollection(collection) {
-        let collectionsCursor = await this.db.listCollections();
-        if( (await collectionsCursor.toArray()).indexOf(collection) >= 0 ){
-            await this.db.dropCollection(collection);
-        }
+        let collectionsCursor = await this.db.listCollections({}, { nameOnly: true });
+        let collections = await collectionsCursor.toArray();
+        let collectionNames = collections.map(c => c.name);
+
+        if (collectionNames.indexOf(collection) >= 0) await this.db.dropCollection(collection);
     }
 
     /**
-    * Create collection
-    *
-    * @param collection String, collection to create, Required
-    */
+     * Create collection
+     *
+     * @param collection String, collection to create, Required
+     */
     async createCollection(collection) {
         let collectionsCursor = await this.db.listCollections();
-        if( (await collectionsCursor.toArray()).indexOf(collection) < 0 ){
+        if ((await collectionsCursor.toArray()).indexOf(collection) < 0) {
             await this.db.createCollection(collection);
         }
     }
 
     /**
-    * Insert a document in a collection
-    *
-    * @param document object to add Required
-    * @param collection String, collection to add the documents, Required
-    *
-    * @return {Promise<string>} The inserted document new id
-    */
+     * Insert a document in a collection
+     *
+     * @param document object to add Required
+     * @param collection String, collection to add the documents, Required
+     *
+     * @return {Promise<string>} The inserted document new id
+     */
     async addDocument(document, collection) {
         const collec = this.db.collection(collection);
         const result = await collec.insertOne(document);
