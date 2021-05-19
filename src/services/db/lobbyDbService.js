@@ -96,7 +96,7 @@ class LobbyDbService {
      *  */
     async updateLobyStartDate(lobby) {
         if (!(lobby instanceof Lobby)) throw new Error("Unexpected type for the lobby");
-        this.database.updateDocument(
+        await this.database.updateDocument(
             { startDate: convertMomentToTimestamp(lobby.startDate) },
             lobby.id,
             LobbyDbService.getCollection()
@@ -107,7 +107,7 @@ class LobbyDbService {
      *  */
     async updateLobyEndDate(lobby) {
         if (!(lobby instanceof Lobby)) throw new Error("Unexpected type for the lobby");
-        this.database.updateDocument(
+        await this.database.updateDocument(
             { endDate: convertMomentToTimestamp(lobby.endDate) },
             lobby.id,
             LobbyDbService.getCollection()
@@ -120,7 +120,7 @@ class LobbyDbService {
      *  */
     async addPlayersToLobby(lobby, player) {
         if (!(lobby instanceof Lobby)) throw new Error("Unexpected type for the lobby");
-        this.database.pushToDocument("otherPlayers", { name: player.name, id: player.id }, lobby.id, LobbyDbService.getCollection());
+        await this.database.pushToDocument("otherPlayers", { name: player.name, id: player.id }, lobby.id, LobbyDbService.getCollection());
     }
 
     /**
@@ -135,7 +135,7 @@ class LobbyDbService {
 
         let newAnswer = {};
         newAnswer[player._id] = answers;
-        this.database.updateDocument(
+        await this.database.updateDocument(
             { answersByPlayerId: newAnswer },
             lobby.id,
             LobbyDbService.getCollection()
