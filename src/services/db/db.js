@@ -10,7 +10,7 @@ const client = new MongoClient(url, {
     auth: config.auth
 });
 
-class quizDB {
+class DatabaseService {
     /**
      * Connect to the database
      * To call once before using the database
@@ -45,7 +45,7 @@ class quizDB {
         let collectionsCursor = await this.db.listCollections();
         if( (await collectionsCursor.toArray()).indexOf(collection) >= 0 ){
             await this.db.dropCollection(collection);
-        }  
+        }
     }
 
     /**
@@ -57,7 +57,7 @@ class quizDB {
         let collectionsCursor = await this.db.listCollections();
         if( (await collectionsCursor.toArray()).indexOf(collection) < 0 ){
             await this.db.createCollection(collection);
-        } 
+        }
     }
 
     /**
@@ -83,4 +83,4 @@ class quizDB {
     }
 }
 
-export default quizDB;
+export default DatabaseService;

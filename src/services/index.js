@@ -1,5 +1,5 @@
+import QuizdbService from "./db/quiz";
 import WebsocketService from "./ws";
-import QuizService from "./quiz/QuizService";
 
 /**
  * Service container
@@ -10,7 +10,7 @@ class ServiceContainer {
      * @param ws {WebsocketService} Websocket service
      * @param quizService {QuizService} Quiz service
      */
-    constructor(ws,quizService) {
+    constructor(ws, quizService) {
         this._ws = ws;
         this._quizService = quizService;
     }
@@ -46,9 +46,9 @@ const init = async (server, database) => {
     ws.init(server);
 
     // Quiz service
-    const quizService = new QuizService(database);
+    const quizService = new QuizdbService(database);
 
-    return new ServiceContainer(ws,quizService);
+    return new ServiceContainer(ws, quizService);
 };
 
 export default init;

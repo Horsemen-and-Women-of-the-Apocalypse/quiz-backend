@@ -1,12 +1,12 @@
 import { assert } from "chai";
 import { describe, test } from "mocha";
 import { StringMultipleChoiceQuestion } from "../../../src/models/question";
-import QuizService from "../../../src/services/quiz/QuizService";
+import QuizService from "../../../src/services/db/quiz";
 import { database } from "../../../src";
 
 // A besoin que la collection des quiz soit déjà créée dans la BDD
 describe("QuizService", () => {
-    
+
     const obj1 = {
         question: "What is love ?",
         choices: [ "Never gonna let you down", "Baby don't hurt me", "Hey, now, you're a rock star, get the show on, get paid" ],
@@ -61,7 +61,7 @@ describe("QuizService", () => {
 
         await database.addDocument(quizObj, QuizService.getCollection());
         await database.addDocument(quizObj2, QuizService.getCollection());
-        
+
         let quiz = await quizService.findById(quizObj2._id);
 
         assert.deepEqual(quiz, quizObj2);
@@ -72,7 +72,7 @@ describe("QuizService", () => {
 
         // Reset DataBase
         await quizService.dropCollection();
-        
+
         let quiz = await quizService.findById();
 
         assert.deepEqual(quiz, null);
