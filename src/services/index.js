@@ -1,6 +1,6 @@
 import WebsocketService from "./ws";
 import QuizService from "./lobby/QuizService";
-import LobbyDbService from "./lobby/lobbyDbService";
+import LobbyDbService from "./db/lobbyDbService";
 
 /**
  * Service container

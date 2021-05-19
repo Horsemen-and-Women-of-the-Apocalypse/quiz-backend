@@ -1,6 +1,6 @@
 import { assert } from "chai";
 import { describe, test } from "mocha";
-import LobbyDbService from "../../../src/services/lobby/lobbyDbService";
+import LobbyDbService from "../../../src/services/db/lobbyDbService";
 import QuizService from "../../../src/services/lobby/QuizService";
 import { database } from "../../../src";
 import { createLobby } from "../../common/utils";
