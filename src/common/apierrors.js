@@ -1,5 +1,9 @@
-const AUTH =  {
+const AUTH = {
     ACCESS_DENIED: "ACCESS_DENIED"
 };
 
-export { AUTH };
+const HTTP = {
+    BODY_UNDEFINED: "BODY_UNDEFINED"
+};
+
+export { AUTH, HTTP };
