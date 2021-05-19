@@ -4,7 +4,13 @@ import AuthError from "../common/autherror";
 import LOGGER from "../utils/logger";
 
 class WebsocketService {
-
+    /**
+     *
+     * @param {LobbyDbService} lobbyDbService
+     */
+    constructor(lobbyDbService) {
+        this.lobbyDbService = lobbyDbService;
+    }
 
     /**
      * Initialize websocket
@@ -16,10 +22,9 @@ class WebsocketService {
         LOGGER.info("[WS] Websocket opened on localhost" + this.ws._path);
 
         // Define middleware
-        this.ws.use((socket, next) => { this.middleware(socket, next) });
+        this.ws.use((socket, next) => { this.middleware(socket, next); });
 
         // Define connection callback
-        this.ws.on("connect", this.onConnection);
         this.ws.on("connection", this.onConnection);
     }
 
@@ -32,19 +37,16 @@ class WebsocketService {
      */
     async middleware(socket, next) {
         try {
-            console.log('middelware');
             let { player, lobby } = await this.checkUserAccess(socket.handshake.query);
-            console.log(player);
-            console.log(lobby);
+            socket.data = {};
+            socket.data.player = player;
+            socket.data.lobby = lobby;
             next();
-
-
         } catch (error) {
             LOGGER.warn("[WS] Failed websocket connection : " + error.message);
             next(error);
         }
     }
-
 
     /**
      * Callback on client connection
@@ -52,17 +54,12 @@ class WebsocketService {
      * @param client Client
      */
     onConnection(client) {
-        console.log('onConnection');
-
         LOGGER.info("[WS] Connection opened with " + client.handshake.address);
 
-        client.emit("connection", "CONNECTION_OPENED");
+        client.emit("connection", "CONNECTION_OPENED, connected to the lobby");
 
         client.on("disconnect", () => {
             LOGGER.info("[WS] Connection closed with " + client.handshake.address);
-        });
-        client.on("joinLobby", (p) => {
-            console.log(p);
         });
     }
 
@@ -80,16 +77,17 @@ class WebsocketService {
      * @param {object} query
      */
     async checkUserAccess(query) {
-        console.log('checkUserAccess');
+        if (!query || !query.playerId) throw new AuthError(AUTH.ACCESS_DENIED + " a playerId is requiered");
+        if (!query.lobbyId) throw new AuthError(AUTH.ACCESS_DENIED + " a lobbyId is requiered");
 
-        if (!query) throw new AuthError(AUTH.ACCESS_DENIED + " a querry is requiered");
-        if (!query.playerId) throw new AuthError(AUTH.ACCESS_DENIED + " a playerId is requiered");
-        if (!query.quizId) throw new AuthError(AUTH.ACCESS_DENIED + " a querryId is requiered");
+        // Check Credentials with DB
+        const lobby = await this.lobbyDbService.findById(query.lobbyId);
+        if (!lobby) throw new AuthError(AUTH.ACCESS_DENIED + " Lobby not found");
 
-        console.log('OK');
-        // TODO Check Credentials with DB
+        const player = lobby.players.find(p => p.id === query.playerId);
+        if (!player) throw new AuthError(AUTH.ACCESS_DENIED + " Player is not in the lobby");
 
-        return { player: true, lobby: true }
+        return { player: player, lobby: lobby };
     }
 }
 
