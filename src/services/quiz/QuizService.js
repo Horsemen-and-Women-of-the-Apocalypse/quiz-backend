@@ -19,7 +19,7 @@ class QuizService {
      *  */
     async init() {
         // parse JSON string to JSON object
-        let initQuizzes = JSON.parse(fs.readFileSync("./src/data/quizzes.json", "UTF-8"));
+        let initQuizzes = JSON.parse(fs.readFileSync("./data/quizzes.json", "UTF-8"));
         
         // Create Quiz object from JSON object
         let allQuizzes = initQuizzes.map(quiz => new Quiz(quiz.name, quiz.questions.map(ques => new StringMultipleChoiceQuestion(ques.question, ques.choices, ques.solutionIndex))));

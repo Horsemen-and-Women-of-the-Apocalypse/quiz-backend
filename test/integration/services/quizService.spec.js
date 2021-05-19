@@ -95,6 +95,8 @@ describe("QuizService", () => {
         delete quiz._id;
         
         assert.deepEqual(quiz, quizFound);
+
+        await quizService.dropCollection();
     });
 
 });

@@ -1,3 +1,2 @@
 config/*.ini
 test/integration/files/**
-src/data/**
