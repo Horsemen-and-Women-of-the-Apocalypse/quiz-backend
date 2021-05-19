@@ -96,4 +96,21 @@ describe("QuizService", () => {
         
         assert.deepEqual(quiz, quizFound);
     });
+
+    test("Create default quizz at initialization", async () => {
+        let quizService = new QuizService(database);
+
+        // Reset DataBase
+        await quizService.dropCollection();
+
+        console.log("Before Init");
+        try{
+            await quizService.init();
+        } catch(e) {
+            console.log(e);
+        }
+        console.log("After Init");
+
+        await quizService.dropCollection();
+    });
 });

@@ -58,6 +58,8 @@ const init = async (server, database) => {
 
     // Quiz service
     const quizService = new QuizService(database);
+    quizService.init();
+
     // Lobby service
     const lobbyService = new LobbyService(database, quizService);
 
