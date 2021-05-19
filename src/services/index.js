@@ -1,5 +1,6 @@
+import QuizDatabaseService from "./db/quiz";
+import QuizService from "./quiz";
 import WebsocketService from "./ws";
-import QuizService from "./quiz/QuizService";
 import LobbyService from "./lobby/lobbyService";
 
 /**
@@ -9,10 +10,12 @@ class ServiceContainer {
     /**
      * Constructor
      * @param ws {WebsocketService} Websocket service
+     * @param quizDbService {QuizDatabaseService} Quiz database service
      * @param quizService {QuizService} Quiz service
      */
-    constructor(ws,quizService, lobbyService) {
+    constructor(ws, quizDbService, quizService, lobbyService) {
         this._ws = ws;
+        this._quizDbService = quizDbService;
         this._quizService = quizService;
         this._lobbyService = lobbyService;
     }
@@ -27,9 +30,18 @@ class ServiceContainer {
     }
 
     /**
+     * Get quiz database service
+     *
+     * @return {QuizDatabaseService} Quiz database service
+     */
+    get quizDbService() {
+        return this._quizDbService;
+    }
+
+    /**
      * Get quiz service
      *
-     * @return {QuizService} Service
+     * @return {QuizService} Quiz service
      */
     get quizService() {
         return this._quizService;
@@ -49,6 +61,7 @@ class ServiceContainer {
  * Init services container
  *
  * @param {Server} server HTTP server
+ * @param database Database service
  * @return {Promise<ServiceContainer>} Services container
  */
 const init = async (server, database) => {
@@ -57,11 +70,11 @@ const init = async (server, database) => {
     ws.init(server);
 
     // Quiz service
-    const quizService = new QuizService(database);
-    // Lobby service
-    const lobbyService = new LobbyService(database, quizService);
+    const quizdbService = new QuizDatabaseService(database);
+    const quizService = new QuizService(quizdbService);
+    const lobbyService = new LobbyService(database, quizdbService);
 
-    return new ServiceContainer(ws,quizService, lobbyService);
+    return new ServiceContainer(ws, quizdbService, quizService, lobbyService);
 };
 
 export default init;

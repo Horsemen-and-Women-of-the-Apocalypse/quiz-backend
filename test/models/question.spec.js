@@ -99,8 +99,8 @@ describe("Question", () => {
 
     describe("#IsAnswer", () => {
         it("Should check user answer", () => {
-            assert.isTrue(testQuestion.isAnswer(1));
-            assert.isFalse(testQuestion.isAnswer(0));
+            assert.isTrue(testQuestion.isAnswer(obj.choices[1]));
+            assert.isFalse(testQuestion.isAnswer(obj.choices[0]));
         });
     });
 });

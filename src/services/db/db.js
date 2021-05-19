@@ -10,7 +10,7 @@ const client = new MongoClient(url, {
     auth: config.auth
 });
 
-class quizDB {
+class DatabaseService {
     /**
      * Connect to the database
      * To call once before using the database
@@ -22,11 +22,11 @@ class quizDB {
     }
 
     /**
-    * Get all documents from a collection
-    *
-    * @param collection String, collection to get the documents from, Required
-    * @return {Promise<Array<object>}
-    */
+     * Get all documents from a collection
+     *
+     * @param collection String, collection to get the documents from, Required
+     * @return {Promise<Array<object>}
+     */
     async getAllDocumentsFromCollection(collection) {
         const collec = this.db.collection(collection);
         const cursor = collec.find();
@@ -37,10 +37,10 @@ class quizDB {
     }
 
     /**
-    * Drop collection
-    *
-    * @param collection String, collection to drop, Required
-    */
+     * Drop collection
+     *
+     * @param collection String, collection to drop, Required
+     */
     async dropCollection(collection) {
         let collectionsCursor = await this.db.listCollections({}, { nameOnly: true });
         let collections = await collectionsCursor.toArray();
@@ -50,13 +50,13 @@ class quizDB {
     }
 
     /**
-    * Insert a document in a collection
-    *
-    * @param document object to add Required
-    * @param collection String, collection to add the documents, Required
-    *
-    * @return {Promise<string>} The inserted document new id
-    */
+     * Insert a document in a collection
+     *
+     * @param document object to add Required
+     * @param collection String, collection to add the documents, Required
+     *
+     * @return {Promise<string>} The inserted document new id
+     */
     async addDocument(document, collection) {
         const collec = this.db.collection(collection);
         const result = await collec.insertOne(document);
@@ -72,4 +72,4 @@ class quizDB {
     }
 }
 
-export default quizDB;
+export default DatabaseService;
