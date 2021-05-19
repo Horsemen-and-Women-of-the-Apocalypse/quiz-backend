@@ -1,19 +1,39 @@
 import { Lobby } from "../../models/lobby";
 import { Player } from "../../models/player";
-
-// Nullable<Lobby> findById(ObjectId id);
+import { convertMomentToTimestamp, convertTimestampToMoment } from "../../utils/dates";
+import { ObjectID } from "mongodb";
 
 // Lobby create(string name, Player owner, Quiz quiz);
 
 // // This operation must be atomic and after it, the player should be in the lobby's players
 // void join(Lobby lobby, Player player);
 
-// // After this method lobby start and end date should be defined
-// void start(Lobby lobby);
-
 // // Save answers of the given player in the lobby
 // // This operation must be atomic
 // void saveAnswers(Lobby lobby, Player player, object[] answers);
+
+const strDateTomoment = (strDate) => {
+    return (strDate === null || strDate === undefined) ? null : convertTimestampToMoment(strDate);
+};
+
+const objToLobby = async (obj, quizService) => {
+    // Get all the parameters
+    let quiz = await quizService.findById(obj.quizId);
+
+    if (!quiz) throw new Error("The quiz saved in the database hasn't been found");
+
+    let owner = new Player(obj.ownerName);
+
+    let players = obj.otherPlayersName.map(pName => new Player(pName));
+    let startDate = strDateTomoment(obj.startDate);
+    let answersByPlayerId = obj.answersByPlayerId ? null : obj.answersByPlayerId;
+    let endDate = strDateTomoment(obj.endDate);
+
+    // Create the lobby
+    const newLobby = new Lobby(obj.name, quiz, owner, players, startDate, answersByPlayerId, endDate);
+    newLobby.id = obj._id.toString();
+    return newLobby;
+};
 
 /**
  * Lobby database service
@@ -39,28 +59,7 @@ class LobbyDbService {
     async getAllLobby() {
         let lobbyList = await this.database.getAllDocumentsFromCollection(LobbyDbService.getCollection());
         let ret = [];
-        for (let i = 0; i < lobbyList.length; i++) {
-            const l = lobbyList[i];
-
-            // Get all the parameters
-            let quiz = await this.quizService.findById(l.quizId);
-
-            if (!quiz) throw new Error("The quiz saved in the database hasn't been found");
-
-            let owner = new Player(l.ownerName);
-
-            let players = l.otherPlayersName.map(pName => new Player(pName));
-
-            let startDate = l.startDate === undefined ? null : l.startDate;
-            let answersByPlayerId = l.answersByPlayerId === undefined ? null : l.answersByPlayerId;
-            let endDate = l.endDate === undefined ? null : l.endDate;
-
-            // Create the lobby
-            const newLobby = new Lobby(l.name, quiz, owner, players, startDate, answersByPlayerId, endDate);
-            newLobby.id = l._id.toString();
-            ret.push(newLobby);
-
-        }
+        for (let i = 0; i < lobbyList.length; i++) ret.push(await objToLobby(lobbyList[i], this.quizService));
         return ret;
     }
 
@@ -89,29 +88,54 @@ class LobbyDbService {
 
 
     /**
-     * Return the correct lobby
+     * Return a lobby by ID
      *
-     * @param ObjectId Int, integer which point on the chosen lobby, Required
-     * @return lobby
+     * @param {string} lobbyId lobby id
+     * @return {Lobby} on null if not found
      *  */
-    async findById(ObjectId) {
-        return (await this.database.db.collection(LobbyDbService.getCollection()).findOne({ "_id": ObjectId }));
+    async findById(lobbyId) {
+        let obj = await this.database.db.collection(LobbyDbService.getCollection()).findOne({ "_id": new ObjectID(lobbyId) });
+
+        if (obj === null) return null;
+        return await objToLobby(obj, this.quizService);
+    }
+
+    /**
+     * Start a lobby
+     *
+     * @param {Lobby} lobby lobby to start
+     *  */
+    async startLobby(lobby) {
+        lobby.start();
+        this.database.updateDocument(
+            { startDate: convertMomentToTimestamp(lobby.startDate) },
+            lobby.id,
+            LobbyDbService.getCollection()
+        );
+    }
+    /**
+     * End a lobby
+     *
+     * @param {Lobby} lobby lobby to start
+     *  */
+    async endLobby(lobby) {
+        lobby.end();
+        this.database.updateDocument(
+            { endDate: convertMomentToTimestamp(lobby.endDate) },
+            lobby.id,
+            LobbyDbService.getCollection()
+        );
     }
 
     /**
      * Return the DB collection of lobby
      *  */
-    static getCollection() {
-        return "lobby";
-    }
+    static getCollection() { return "lobby"; }
 
     /**
      * Drop the DB collection of lobby
-     *
      *  */
-    async dropCollection() {
-        await this.database.dropCollection(LobbyDbService.getCollection());
-    }
+    async dropCollection() { await this.database.dropCollection(LobbyDbService.getCollection()); }
 
 }
 

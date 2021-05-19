@@ -5,10 +5,11 @@ import QuizService from "../../../src/services/quiz/QuizService";
 import { database } from "../../../src";
 import { createLobby } from "../../common/utils";
 import { Lobby } from "../../../src/models/lobby";
+import { isMoment } from "../../../src/utils/dates";
 
 describe("LobbyDbService", () => {
 
-    test("Should add load lobby to the DataBase", async () => {
+    test("Should add and load lobby from the DataBase", async () => {
         const quizService = new QuizService(database);
         await quizService.dropCollection();
         const lobbyDbService = new LobbyDbService(database, quizService);
@@ -47,6 +48,63 @@ describe("LobbyDbService", () => {
 
         allLobby = await lobbyDbService.getAllLobby();
         assert.equal(allLobby.length, 3);
+    });
+    test("Should be able to find by ID", async () => {
+        const quizService = new QuizService(database);
+        await quizService.dropCollection();
+        const lobbyDbService = new LobbyDbService(database, quizService);
+        await lobbyDbService.dropCollection();
+
+        const l1 = createLobby();
+        await quizService.addQuiz(l1.quiz);
+
+        // Lobby insertion
+        let newId = await lobbyDbService.addLobby(l1);
+
+        // Find by id
+        let myLobby = await lobbyDbService.findById(newId);
+        assert.isTrue(myLobby instanceof Lobby);
+        assert.equal(l1.id, myLobby.id);
+    });
+    test("Should be able to start and end", async () => {
+        const quizService = new QuizService(database);
+        await quizService.dropCollection();
+        const lobbyDbService = new LobbyDbService(database, quizService);
+        await lobbyDbService.dropCollection();
+
+        const l1 = createLobby();
+        await quizService.addQuiz(l1.quiz);
+
+        // Lobby insertion
+        await lobbyDbService.addLobby(l1);
+
+        // Start lobby
+        await lobbyDbService.startLobby(l1);
+
+        assert.isNotNull(l1.startDate);
+        assert.isNull(l1.endDate);
+
+        // Find altered lobby
+        let myLobby = await lobbyDbService.findById(l1.id);
+
+        assert.isNotNull(myLobby.startDate);
+        assert.isNull(myLobby.endDate);
+
+        // End lobby
+        await lobbyDbService.endLobby(l1);
+
+        assert.isNotNull(l1.startDate);
+        assert.isNotNull(l1.endDate);
+
+        // Find altered lobby
+        let myLobby2 = await lobbyDbService.findById(l1.id);
+
+        assert.isNotNull(myLobby2.startDate);
+        assert.isNotNull(myLobby2.endDate);
+
+        assert.isTrue(isMoment(myLobby2.startDate));
+        assert.isTrue(isMoment(myLobby2.endDate));
+
     });
 
 });
