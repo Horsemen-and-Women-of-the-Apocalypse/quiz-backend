@@ -1,7 +1,8 @@
 import QuizDatabaseService from "./db/quiz";
 import QuizService from "./quiz";
 import WebsocketService from "./ws";
-import LobbyService from "./lobby/lobbyService";
+import LobbyDbService from "./db/lobbyDbService";
+
 
 /**
  * Service container
@@ -13,11 +14,11 @@ class ServiceContainer {
      * @param quizDbService {QuizDatabaseService} Quiz database service
      * @param quizService {QuizService} Quiz service
      */
-    constructor(ws, quizDbService, quizService, lobbyService) {
+    constructor(ws, quizDbService, quizService, lobbyDbService) {
         this._ws = ws;
         this._quizDbService = quizDbService;
         this._quizService = quizService;
-        this._lobbyService = lobbyService;
+        this._lobbyDbService = lobbyDbService;
     }
 
     /**
@@ -50,10 +51,10 @@ class ServiceContainer {
     /**
      * Get quiz service
      *
-     * @return {LobbyService} Service
+     * @return {LobbyDbService} Service
      */
-    get lobbyService() {
-        return this._lobbyService;
+    get lobbyDbService() {
+        return this._lobbyDbService;
     }
 }
 
@@ -69,12 +70,11 @@ const init = async (server, database) => {
     const ws = new WebsocketService();
     ws.init(server);
 
-    // Quiz service
     const quizdbService = new QuizDatabaseService(database);
     const quizService = new QuizService(quizdbService);
-    const lobbyService = new LobbyService(database, quizdbService);
+    const lobbyDbService = new LobbyDbService(database, quizdbService);
 
-    return new ServiceContainer(ws, quizdbService, quizService, lobbyService);
+    return new ServiceContainer(ws, quizdbService, quizService, lobbyDbService);
 };
 
 export default init;

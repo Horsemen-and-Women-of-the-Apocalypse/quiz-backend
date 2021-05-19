@@ -3,6 +3,27 @@ import { Route } from "../../route";
 import { Response } from "../../router";
 
 /**
+ * Callback on callback on /list
+ * 
+ * @param services Services 
+ * @param request Request
+ * @param response Response
+ * @param next Next function
+ * @return {Promise<void>} Promise
+ */
+const list = async (services, request, response, next) => {
+    try {
+        // Get all quizzes
+        const results = await services.quizService.getAllQuizzes();
+
+        // Send results
+        response.json(new Response((results)));
+    } catch(e) {
+        next(e);
+    } 
+};
+
+/**
  * Callback on /quiz/:id/answer
  *
  * @param services Service container
@@ -35,5 +56,6 @@ const answer = async (services, request, response, next) => {
 };
 
 export default {
+    "list": new Route(route => route + "/list", "get", list),
     "answer": new Route(route => route + "/:id/answer", "post", answer)
 };

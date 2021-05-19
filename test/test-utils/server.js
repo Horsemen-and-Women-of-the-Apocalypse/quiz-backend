@@ -4,6 +4,9 @@ const SERVER_URL = "http://localhost:" + serverConfig.port;
 
 // Common
 const VERSION_ROUTE = "/version";
-const QUIZ_ANSWER_ROUTE = (id) => "/quiz/" + id + "/answer";
 
-export { SERVER_URL, VERSION_ROUTE, QUIZ_ANSWER_ROUTE };
+// Quiz
+const QUIZ_ANSWER_ROUTE = (id) => "/quiz/" + id + "/answer";
+const QUIZ_LIST_ROUTE = "/quiz/list";
+
+export { SERVER_URL, VERSION_ROUTE, QUIZ_LIST_ROUTE, QUIZ_ANSWER_ROUTE };

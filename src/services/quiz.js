@@ -15,6 +15,20 @@ class QuizService {
     }
 
     /**
+     * Return all quizzes saved in the database
+     * 
+     * @return {Promise<[{id: number, name: string}]>} Array of quizzes
+     */
+    async getAllQuizzes() {
+        return (await this.quizDbService.allQuizzes()).map((item) => { 
+            return { 
+                "id": item._id, 
+                "name": item._name 
+            }; 
+        });
+    }
+
+    /**
      * Check user's answers for the given quiz
      *
      * @param quizId Quiz's id

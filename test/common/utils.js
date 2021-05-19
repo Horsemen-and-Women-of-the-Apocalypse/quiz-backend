@@ -42,7 +42,9 @@ function createLobby() {
     const q = createQuiz();
 
     const p1 = new Player("toto");
-    return new Lobby(lobbyName, q, p1, []);
+    const p2 = new Player("tata");
+    const p3 = new Player("tutu");
+    return new Lobby(lobbyName, q, p1, [ p2, p3 ]);
 }
 
 export { createQuiz, createLobby };

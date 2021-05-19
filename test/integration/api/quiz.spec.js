@@ -6,7 +6,7 @@ import { StringMultipleChoiceQuestion } from "../../../src/models/question";
 import { Quiz } from "../../../src/models/quiz";
 import QuizDatabaseService from "../../../src/services/db/quiz";
 import { parseJSONResponse } from "../../test-utils/http";
-import { QUIZ_ANSWER_ROUTE, SERVER_URL } from "../../test-utils/server";
+import { QUIZ_LIST_ROUTE, QUIZ_ANSWER_ROUTE, SERVER_URL } from "../../test-utils/server";
 
 const quiz = new Quiz("Test", [
     new StringMultipleChoiceQuestion("A", [ "A", "B", "C" ], 0),
@@ -23,6 +23,17 @@ describe("API", () => {
         // Reset quiz collection and add a quiz
         await service.dropCollection();
         quizId = await service.addQuiz(quiz);
+    });
+
+    describe("/quiz/list", () => {
+        it("Should return all quizzes", async () => {
+            const service = new QuizDatabaseService(database);
+
+            let response = await chai.request(SERVER_URL).get(QUIZ_LIST_ROUTE);
+
+            chai.assert.equal(response.status, 200);
+            chai.assert.sameDeepMembers(parseJSONResponse(response).data, (await service.allQuizzes()).map((item) => { return { "id": item["_id"], "name": item["_name"] }; }));
+        });
     });
 
     describe("/quiz/:id/answer", () => {
