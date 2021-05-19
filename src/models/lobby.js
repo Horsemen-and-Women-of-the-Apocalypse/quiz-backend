@@ -89,8 +89,6 @@ class Lobby {
      */
     addPlayer(player) {
         if (this.startDate !== null) throw new Error("The lobby has already started, cant add a player");
-        console.log(this.players);
-        console.log(player);
         if (this.players.find(p => p.id == player.id)) throw new Error("The player has already been added");
 
         this._otherPlayers.push(player);
@@ -107,6 +105,7 @@ class Lobby {
             };
         });
     }
+
 }
 
 

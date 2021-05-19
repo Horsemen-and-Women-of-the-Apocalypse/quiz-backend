@@ -3,10 +3,6 @@ import { Player } from "../../models/player";
 import { convertMomentToTimestamp, convertTimestampToMoment } from "../../utils/dates";
 import { ObjectID } from "mongodb";
 
-// // Save answers of the given player in the lobby
-// // This operation must be atomic
-// void saveAnswers(Lobby lobby, Player player, object[] answers);
-
 const strDateTomoment = (strDate) => {
     return (strDate === null || strDate === undefined) ? null : convertTimestampToMoment(strDate);
 };
@@ -21,7 +17,7 @@ const objToLobby = async (obj, quizService) => {
 
     let players = obj.otherPlayers.map(p => new Player(p.name, p.id));
     let startDate = strDateTomoment(obj.startDate);
-    let answersByPlayerId = obj.answersByPlayerId ? null : obj.answersByPlayerId;
+    let answersByPlayerId = obj.answersByPlayerId ? obj.answersByPlayerId : {};
     let endDate = strDateTomoment(obj.endDate);
 
     // Create the lobby
@@ -96,12 +92,10 @@ class LobbyDbService {
     }
 
     /**
-     * Start a lobby
-     *
-     * @param {Lobby} lobby lobby to start
+     * @param {Lobby} lobby
      *  */
-    async startLobby(lobby) {
-        lobby.start();
+    async updateLobyStartDate(lobby) {
+        if (!(lobby instanceof Lobby)) throw new Error("Unexpected type for the lobby");
         this.database.updateDocument(
             { startDate: convertMomentToTimestamp(lobby.startDate) },
             lobby.id,
@@ -109,12 +103,10 @@ class LobbyDbService {
         );
     }
     /**
-     * End a lobby
-     *
-     * @param {Lobby} lobby lobby to start
+     * @param {Lobby} lobby
      *  */
-    async endLobby(lobby) {
-        lobby.end();
+    async updateLobyEndDate(lobby) {
+        if (!(lobby instanceof Lobby)) throw new Error("Unexpected type for the lobby");
         this.database.updateDocument(
             { endDate: convertMomentToTimestamp(lobby.endDate) },
             lobby.id,
@@ -123,15 +115,28 @@ class LobbyDbService {
     }
 
     /**
-     * player join a lobby
-     *
-     * @param {Lobby} lobby lobby to start
-     * @param {Player} player player that has join
+     * @param {Lobby} lobby
+     * @param {Player} player
      *  */
-    async playerJoin(lobby, player) {
-        lobby.addPlayer(player);
+    async updateLobyPlayers(lobby, player) {
+        if (!(lobby instanceof Lobby)) throw new Error("Unexpected type for the lobby");
+        this.database.pushToDocument("otherPlayers", { name: player.name, id: player.id }, lobby.id, LobbyDbService.getCollection());
+    }
+
+    /**
+     * @param {Lobby} lobby
+     * @param {Player} player
+     * @param {Array} answers
+     *  */
+    async updateLobyPlayerAnswers(lobby, player, answers) {
+        if (!(lobby instanceof Lobby)) throw new Error("Unexpected type for the lobby");
+        if (!(player instanceof Player)) throw new Error("Unexpected type for the player");
+        if (!Array.isArray(answers)) throw new Error("Unexpected type for the answers");
+
+        let newAnswer = {};
+        newAnswer[player._id] = answers;
         this.database.updateDocument(
-            { otherPlayers: lobby.getPlayersToObj() },
+            { answersByPlayerId: newAnswer },
             lobby.id,
             LobbyDbService.getCollection()
         );

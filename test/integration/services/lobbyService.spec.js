@@ -80,7 +80,8 @@ describe("LobbyDbService", () => {
         await lobbyDbService.addLobby(l1);
 
         // Start lobby
-        await lobbyDbService.startLobby(l1);
+        l1.start();
+        await lobbyDbService.updateLobyStartDate(l1);
 
         assert.isNotNull(l1.startDate);
         assert.isNull(l1.endDate);
@@ -92,7 +93,8 @@ describe("LobbyDbService", () => {
         assert.isNull(myLobby.endDate);
 
         // End lobby
-        await lobbyDbService.endLobby(l1);
+        l1.end();
+        await lobbyDbService.updateLobyEndDate(l1);
 
         assert.isNotNull(l1.startDate);
         assert.isNotNull(l1.endDate);
@@ -120,14 +122,36 @@ describe("LobbyDbService", () => {
 
         // Add player lobby
         let p1 = new Player("momo");
-        await lobbyDbService.playerJoin(l1, p1);
+        l1.addPlayer(p1);
+        await lobbyDbService.updateLobyPlayers(l1, p1);
 
         // Find altered lobby
         let myLobby = await lobbyDbService.findById(l1.id);
         let myPlayer = myLobby.players.find(p => p.id === p1.id);
         assert.isTrue(myPlayer instanceof Player);
-        assert.equal(myPlayer.id, p1.id)
+        assert.equal(myPlayer.id, p1.id);
+    });
+    test("Players Should be able to add answers", async () => {
+        const quizService = new QuizService(database);
+        await quizService.dropCollection();
+        const lobbyDbService = new LobbyDbService(database, quizService);
+        await lobbyDbService.dropCollection();
+
+        const l1 = createLobby();
+        await quizService.addQuiz(l1.quiz);
+
+        // Lobby insertion
+        await lobbyDbService.addLobby(l1);
+
+        // Add player lobby
+        let p1 = new Player("momo");
+        l1.addPlayer(p1);
+        await lobbyDbService.updateLobyPlayerAnswers(l1, p1, [ "toto", "tata" ]);
+
+        // Find altered lobby
+        let myLobby = await lobbyDbService.findById(l1.id);
+        assert.isTrue(p1.id in myLobby.answersByPlayerId);
+        assert.deepEqual(myLobby.answersByPlayerId[p1.id], [ "toto", "tata" ]);
 
     });
-
 });

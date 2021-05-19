@@ -78,6 +78,23 @@ class quizDB {
         var newvalues = { $set: obj };
         await this.db.collection(collection).updateOne(myquery, newvalues);
     }
+    /**
+    * Push to an array to a document in a collection
+    *
+    * @param {string} arrayName array to push in
+    * @param {object} value to add
+    * @param {string} documentId Document ID to update
+    * @param {string} collection collection of the document
+    *
+    * @return {Promise} The inserted document new id
+    */
+    async pushToDocument(arrayName, value, documentId, collection) {
+        var myquery = { _id: new ObjectID(documentId) };
+        let newV = {};
+        newV[arrayName] = value;
+        var newvalues = { $push: newV };
+        await this.db.collection(collection).updateOne(myquery, newvalues);
+    }
 
     /**
      * Close the database
