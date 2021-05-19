@@ -3,11 +3,6 @@ import { Player } from "../../models/player";
 import { convertMomentToTimestamp, convertTimestampToMoment } from "../../utils/dates";
 import { ObjectID } from "mongodb";
 
-// Lobby create(string name, Player owner, Quiz quiz);
-
-// // This operation must be atomic and after it, the player should be in the lobby's players
-// void join(Lobby lobby, Player player);
-
 // // Save answers of the given player in the lobby
 // // This operation must be atomic
 // void saveAnswers(Lobby lobby, Player player, object[] answers);
@@ -24,7 +19,7 @@ const objToLobby = async (obj, quizService) => {
 
     let owner = new Player(obj.ownerName);
 
-    let players = obj.otherPlayersName.map(pName => new Player(pName));
+    let players = obj.otherPlayers.map(p => new Player(p.name, p.id));
     let startDate = strDateTomoment(obj.startDate);
     let answersByPlayerId = obj.answersByPlayerId ? null : obj.answersByPlayerId;
     let endDate = strDateTomoment(obj.endDate);
@@ -74,7 +69,7 @@ class LobbyDbService {
         let lobbyObjToAdd = {
             name: lobby.name,
             ownerName: lobby.owner.name,
-            otherPlayersName: lobby._otherPlayers.map(p => p.name),
+            otherPlayers: lobby.getPlayersToObj(),
             quizId: lobby.quiz.id,
             startDate: lobby.startDate,
             endDate: lobby.endDate,
@@ -122,6 +117,21 @@ class LobbyDbService {
         lobby.end();
         this.database.updateDocument(
             { endDate: convertMomentToTimestamp(lobby.endDate) },
+            lobby.id,
+            LobbyDbService.getCollection()
+        );
+    }
+
+    /**
+     * player join a lobby
+     *
+     * @param {Lobby} lobby lobby to start
+     * @param {Player} player player that has join
+     *  */
+    async playerJoin(lobby, player) {
+        lobby.addPlayer(player);
+        this.database.updateDocument(
+            { otherPlayers: lobby.getPlayersToObj() },
             lobby.id,
             LobbyDbService.getCollection()
         );
