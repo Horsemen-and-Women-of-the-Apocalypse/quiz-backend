@@ -44,21 +44,9 @@ class DatabaseService {
     async dropCollection(collection) {
         let collectionsCursor = await this.db.listCollections({}, { nameOnly: true });
         let collections = await collectionsCursor.toArray();
-        let collectionNames = collections.map(c => c.name);
+        let collectionNames = collections.map(c =>c.name);
 
         if (collectionNames.indexOf(collection) >= 0) await this.db.dropCollection(collection);
-    }
-
-    /**
-     * Create collection
-     *
-     * @param collection String, collection to create, Required
-     */
-    async createCollection(collection) {
-        let collectionsCursor = await this.db.listCollections();
-        if ((await collectionsCursor.toArray()).indexOf(collection) < 0) {
-            await this.db.createCollection(collection);
-        }
     }
 
     /**

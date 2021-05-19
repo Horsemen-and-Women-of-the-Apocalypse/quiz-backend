@@ -1,6 +1,7 @@
 import { assert } from "chai";
 import { describe, test } from "mocha";
 import { database } from "../../../src";
+import { createQuiz } from "../../common/utils";
 import { StringMultipleChoiceQuestion } from "../../../src/models/question";
 import { Quiz } from "../../../src/models/quiz";
 import QuizService from "../../../src/services/db/quiz";
@@ -65,7 +66,7 @@ describe("QuizService", () => {
         assert.deepEqual(quiz, quizObj2);
     });
 
-    test("Sould not find any quizzes in DataBase which matches the id", async () => {
+    test("Should not find any quizzes in DataBase which matches the id", async () => {
         let quizService = new QuizService(database);
 
         // Reset DataBase
@@ -74,5 +75,21 @@ describe("QuizService", () => {
         let quiz = await quizService.findById();
 
         assert.deepEqual(quiz, null);
+    });
+
+    test("Should add quiz in DataBase and return its id", async () => {
+        let quizService = new QuizService(database);
+        let quiz = createQuiz();
+
+        // Reset DataBase
+        await quizService.dropCollection();
+
+        // Add quiz in DB
+        let returnId = await quizService.addQuiz(quiz);
+
+        let quizFound = await quizService.findById(returnId);
+        delete quiz._id;
+
+        assert.deepEqual(quiz, quizFound);
     });
 });
