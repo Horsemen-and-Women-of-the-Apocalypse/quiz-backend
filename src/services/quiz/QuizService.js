@@ -37,6 +37,28 @@ class QuizService {
     }
 
     /**
+     * Add quiz in DB quizzes collection and add its id
+     * 
+     * @param {Quiz} quiz, ..., Required
+     * @return {string} Quiz._id
+     *  */ 
+    async addQuiz(quiz) {
+        if (!(quiz instanceof Quiz)) throw new Error("Unexpected type for the quiz");
+        let quizJSON = { 
+            _name : quiz._name, 
+            _questions : quiz._questions.map( ques => { 
+                return { 
+                    _question : ques._question, 
+                    _choices : ques._choices, 
+                    _solutionIndex : ques._solutionIndex 
+                };
+            } )
+        };
+        quiz.id = await this.database.addDocument(quizJSON, QuizService.getCollection());
+        return quiz.id;
+    }
+
+    /**
      * Return the DB collection of quizzes
      * 
      * @return Quiz
