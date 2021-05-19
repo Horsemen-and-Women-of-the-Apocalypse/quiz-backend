@@ -46,6 +46,39 @@ class QuizService {
     }
 
     /**
+     * Get questions of a given quiz
+     *
+     * @param quizId Quiz's id
+     * @return {Promise<[{question: string, choices: []}]>} Questions without solution
+     */
+    async getQuizQuestions(quizId) {
+        // Retrieve quiz
+        const quiz = await this.quizDbService.findById(quizId);
+        if (!(quiz instanceof Quiz)) {
+            throw new Error("No quiz found for id: " + quizId);
+        }
+
+        // Format questions and remove solution for each of them
+        const questions = quiz.questions.map(item => {
+            let q = {
+                "question": item._question
+            };
+
+            switch(item.constructor.name) {
+                case "StringMultipleChoiceQuestion":
+                    q.choices = item._choices;
+                    break;
+                default:
+                    throw new Error("Question type not yet implemented");
+            }
+
+            return q;
+        });
+
+        return questions;
+    }
+
+    /**
      * Check user's answers for the given quiz
      *
      * @param quizId Quiz's id
