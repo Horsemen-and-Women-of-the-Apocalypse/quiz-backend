@@ -1,0 +1,102 @@
+{
+	"quizzes" : 
+	[ 
+	{
+		"name": "Painting and museum",
+		"questions": [ {
+			"question": "Which French president is behind the construction of the Louvre pyramid ?",
+			"choices": [ "Georges Pompidou", "François Mitterrand", "Charles de Gaulle", "Jacques Chirac" ],
+			"solutionIndex": 2
+			},
+			{
+			"question": "To which painter do we owe “Boats in the port of Collioure” ?",
+			"choices": [ "Nicolas de Staël", "Henri Matisse", "Paul Gauguin", "André Derain" ],
+			"solutionIndex": 4
+			},
+			{
+			"question": "Which artistic movement did Rembrandt, Vermeer, Velázquez or Rubens belonged to ?",
+			"choices": [ "The baroque", "The rococo", "The pop art", "The symbolism" ],
+			"solutionIndex": 1
+			},
+			{
+			"question": "To which painter do we owe “The Self-Portrait with the Green Vest” ?",
+			"choices": [ "Pierre Bonnard", "Rembrandt", "Eugène Delacroix", "Jacques-Louis David" ],
+			"solutionIndex": 3
+			},
+			{
+			"question": "What does Dali's painting “Persistence of memory” represent ?",
+			"choices": [ "Soft watches", "A flying horse", "A naked woman", "A giraffe woman on fire" ],
+			"solutionIndex": 1
+			},
+			{
+			"question": "To which painter do we owe “Liberty leading the people” ?",
+			"choices": [ "Géricault", "David", "Delacroix", "Rembrandt" ],
+			"solutionIndex": 3
+			} 
+		]
+	},
+	{
+		"name": "Animals",
+		"questions": [ {
+			"question": "Which animal is close to the oryx ?",
+			"choices": [ "A cheetah", "A gazelle", "A hippopotamus", "An armadillo" ],
+			"solutionIndex": 2
+			},
+			{
+			"question": "What animal family does the zebu belong to?",
+			"choices": [ "Amphibians", "Bovines", "Instects", "Reptiles" ],
+			"solutionIndex": 2
+			},
+			{
+			"question": "Which animal is featured in the movie “Jappeloup” ?",
+			"choices": [ "A fox", "A snake", "A tiger", "A horse" ],
+			"solutionIndex": 4
+			},
+			{
+			"question": "What is a pipistrelle ?",
+			"choices": [ "A sheep", "A bat", "A giraffe", "A sea lion" ],
+			"solutionIndex": 3
+			},
+			{
+			"question": "What does an arachnologist study ?",
+			"choices": [ "Rats", "Snakes", "Spiders", "Eagles" ],
+			"solutionIndex": 3
+			},
+			{
+			"question": "Which animal symbolizes grace ?",
+			"choices": [ "The flamingo", "The stork", "The peacock", "The kangaroo" ],
+			"solutionIndex": 2
+			} 
+		]
+	},
+	{
+		"name": "Sandwiches and fast food ",
+		"questions": [ {
+			"question": "What are the first names of 2 McDonald brothers who created the famous chain of the same name ?",
+			"choices": [ "John et Peter", "Richard et Maurice", "Anthony et Carlos", "Michael et Tom" ],
+			"solutionIndex": 2
+			},
+			{
+			"question": "What health scandal has strongly affected fast food restaurants due to the drop in meat consumption ?",
+			"choices": [ "H1N1 flu", "Contaminated blood", "Mad cow disease", "The asbestos scandal " ],
+			"solutionIndex": 4
+			},
+			{
+			"question": "What is the main ingredient in a sandwich called a “lobster roll” ?",
+			"choices": [ "Shrimps", "Black pudding", "Veal", "Lobster" ],
+			"solutionIndex": 1
+			},
+			{
+			"question": "Which high-end French fast food chain was created in 2002 by Olivier Bertrand ?",
+			"choices": [ "La Brioche dorée", "La Mie câline", "Bert's", "Chez Paul" ],
+			"solutionIndex": 3
+			},
+			{
+			"question": "At Quick, which rugby player gave his name to a hamburger? ",
+			"choices": [ "Sébastien Chabal ", "Fabien Pelous", "Frédéric Michalak", "Jonah Lomu" ],
+			"solutionIndex": 1
+			}
+		]
+	}
+	]
+}
