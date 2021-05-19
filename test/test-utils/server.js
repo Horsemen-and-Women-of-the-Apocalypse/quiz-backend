@@ -9,5 +9,6 @@ const VERSION_ROUTE = "/version";
 const QUIZ_ANSWER_ROUTE = (id) => `/quiz/${id}/answer`;
 const QUIZ_QUESTIONS_ROUTE = (id) => `/quiz/${id}/questions`;
 const QUIZ_LIST_ROUTE = "/quiz/list";
+const QUIZ_CREATE_ROUTE = "/quiz/create";
 
-export { SERVER_URL, VERSION_ROUTE, QUIZ_LIST_ROUTE, QUIZ_QUESTIONS_ROUTE, QUIZ_ANSWER_ROUTE };
+export { SERVER_URL, VERSION_ROUTE, QUIZ_QUESTIONS_ROUTE, QUIZ_LIST_ROUTE, QUIZ_CREATE_ROUTE, QUIZ_ANSWER_ROUTE };
