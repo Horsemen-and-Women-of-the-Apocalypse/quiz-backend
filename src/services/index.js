@@ -1,5 +1,5 @@
 import WebsocketService from "./ws";
-import QuizService from "./lobby/QuizService";
+import QuizService from "./quiz/QuizService";
 import LobbyDbService from "./db/lobbyDbService";
 
 /**
