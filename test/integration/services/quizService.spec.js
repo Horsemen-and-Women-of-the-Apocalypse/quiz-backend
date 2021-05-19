@@ -88,8 +88,9 @@ describe("QuizService", () => {
         let returnId = await quizService.addQuiz(quiz);
 
         let quizFound = await quizService.findById(returnId);
-        delete quiz._id;
 
+        delete quiz._id;
+        delete quizFound._id;
         assert.deepEqual(quiz, quizFound);
     });
 });
