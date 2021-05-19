@@ -26,9 +26,9 @@ class QuizService {
 
         // Add default quiz in database if quizzes' collection is empty or not created
         if(this.database.isEmptyCollection(QuizService.getCollection())){
-            allQuizzes.forEach(quiz => {
-                this.addQuiz(quiz);
-            });       
+            for(let i=0 ; i < allQuizzes.length ; i++){
+                await this.addQuiz(allQuizzes[i]);
+            }       
         }
     }
 
