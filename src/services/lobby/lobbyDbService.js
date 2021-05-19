@@ -16,10 +16,10 @@ import { Player } from "../../models/player";
 // void saveAnswers(Lobby lobby, Player player, object[] answers);
 
 /**
- * Lobby service
+ * Lobby database service
  * Store and restore lobby from the database
  */
-class LobbyService {
+class LobbyDbService {
     /**
      * Constructor
      *
@@ -37,7 +37,7 @@ class LobbyService {
      * @returns {Promise<Array<Lobby>>} new lobby id
      *  */
     async getAllLobby() {
-        let lobbyList = await this.database.getAllDocumentsFromCollection(LobbyService.getCollection());
+        let lobbyList = await this.database.getAllDocumentsFromCollection(LobbyDbService.getCollection());
         let ret = [];
         for (let i = 0; i < lobbyList.length; i++) {
             const l = lobbyList[i];
@@ -82,7 +82,7 @@ class LobbyService {
             answersByPlayerId: lobby.answersByPlayerId
         };
 
-        let lobbyId = await this.database.addDocument(lobbyObjToAdd, LobbyService.getCollection());
+        let lobbyId = await this.database.addDocument(lobbyObjToAdd, LobbyDbService.getCollection());
         lobby.id = lobbyId.toString();
         return lobby.id;
     }
@@ -95,7 +95,7 @@ class LobbyService {
      * @return lobby
      *  */
     async findById(ObjectId) {
-        return (await this.database.db.collection(LobbyService.getCollection()).findOne({ "_id": ObjectId }));
+        return (await this.database.db.collection(LobbyDbService.getCollection()).findOne({ "_id": ObjectId }));
     }
 
     /**
@@ -110,9 +110,9 @@ class LobbyService {
      *
      *  */
     async dropCollection() {
-        await this.database.dropCollection(LobbyService.getCollection());
+        await this.database.dropCollection(LobbyDbService.getCollection());
     }
 
 }
 
-export default LobbyService;
+export default LobbyDbService;
