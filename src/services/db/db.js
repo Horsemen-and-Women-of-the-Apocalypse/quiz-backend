@@ -38,6 +38,20 @@ class DatabaseService {
     }
 
     /**
+    * Return if a collection is empty or not
+    *
+    * @param collection String, collection to drop, Required
+    * @return {bool} True if collection is empty or not created in database
+    */
+    async isEmptyCollection(collection) {
+        let collectionsCursor = await this.db.listCollections({}, { nameOnly: true });
+        let collections = await collectionsCursor.toArray();
+        let collectionNames = collections.map(c =>c.name);
+
+        return !(collectionNames.indexOf(collection) >= 0);
+    }
+
+    /**
      * Drop collection
      *
      * @param collection String, collection to drop, Required

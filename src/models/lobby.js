@@ -96,6 +96,20 @@ class Lobby {
     }
 
     /**
+     *
+     * @param {Player} player
+     * @param {Array} answers
+     */
+    setPlayerAnswers(player, answers) {
+        if (!(player instanceof Player)) throw new Error("Unexpected type for the player");
+        if (!Array.isArray(answers)) throw new Error("Unexpected type for the answers");
+
+        if (player.id in this.answersByPlayerId) throw new Error("Answers already added");
+
+        this.answersByPlayerId[player.id] = answers;
+    }
+
+    /**
      * @returns {Array<object>}
      */
     getPlayersToObj() {
