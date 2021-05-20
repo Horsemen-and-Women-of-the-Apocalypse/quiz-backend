@@ -1,7 +1,6 @@
 import chai from "chai";
 import { beforeEach, describe, it } from "mocha";
 import { ObjectID } from "mongodb";
-import Semaphore from "semaphore";
 import io from "socket.io-client";
 import { database } from "../../../src";
 import LobbyDbService from "../../../src/services/db/lobbyDbService";
@@ -127,14 +126,7 @@ describe("LobbyAPI", () => {
 
         it("Start lobby with owner", async () => {
             let ownerStartEvent = null;
-            const ownerEndEventSem = Semaphore(1);
-            ownerEndEventSem.take(() => {
-            });
-
             let playerStartEvent = null;
-            const playerEndEventSem = Semaphore(1);
-            playerEndEventSem.take(() => {
-            });
 
             // Connect owner and a player to socket
             const ownerClient = io(SERVER_URL, {
@@ -144,9 +136,7 @@ describe("LobbyAPI", () => {
                 }
             });
             ownerClient.on(EVENTS.LOBBY_START, () => ownerStartEvent = "OK");
-            ownerClient.on(EVENTS.LOBBY_END, () => {
-                ownerEndEventSem.leave();
-            });
+            const ownerEndPromise = new Promise((resolve => ownerClient.on(EVENTS.LOBBY_END, resolve)));
             const playerClient = io(SERVER_URL, {
                 path: WebsocketService.RELATIVE_PATH, query: {
                     lobbyId: lobbyId,
@@ -154,22 +144,14 @@ describe("LobbyAPI", () => {
                 }
             });
             playerClient.on(EVENTS.LOBBY_START, () => playerStartEvent = "OK");
-            playerClient.on(EVENTS.LOBBY_END, () => {
-                playerEndEventSem.leave();
-            });
+            const playerEndPromise = new Promise(resolve => playerClient.on(EVENTS.LOBBY_END, resolve));
 
             // Start lobby
             const response = await chai.request(SERVER_URL).post(LOBBY_START_ROUTE(lobbyId)).send({ playerId: lobby.owner.id });
             chai.assert.equal(response.status, 200);
 
             // Wait lobby end
-            await new Promise(resolve => {
-                ownerEndEventSem.take(() => {
-                    playerEndEventSem.take(() => {
-                        resolve();
-                    });
-                });
-            });
+            await Promise.all([ ownerEndPromise, playerEndPromise ]);
             ownerClient.close();
             playerClient.close();
 
@@ -178,10 +160,6 @@ describe("LobbyAPI", () => {
         });
 
         it("Start lobby which is already started", async () => {
-            const lobbyEndSem = Semaphore(1);
-            lobbyEndSem.take(() => {
-            });
-
             // Connect owner to socket
             const ownerClient = io(SERVER_URL, {
                 path: WebsocketService.RELATIVE_PATH, query: {
@@ -189,9 +167,7 @@ describe("LobbyAPI", () => {
                     playerId: lobby.owner.id,
                 }
             });
-            ownerClient.on(EVENTS.LOBBY_END, () => {
-                lobbyEndSem.leave();
-            });
+            const ownerEndPromise = new Promise((resolve => ownerClient.on(EVENTS.LOBBY_END, resolve)));
 
             // Start lobby
             let response = await chai.request(SERVER_URL).post(LOBBY_START_ROUTE(lobbyId)).send({ playerId: lobby.owner.id });
@@ -202,11 +178,7 @@ describe("LobbyAPI", () => {
             chai.assert.equal(response.status, 500);
 
             // Wait lobby end
-            await new Promise(resolve => {
-                lobbyEndSem.take(() => {
-                    resolve();
-                });
-            });
+            await ownerEndPromise;
             ownerClient.close();
         });
     });
