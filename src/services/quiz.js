@@ -98,16 +98,27 @@ class QuizService {
         }
 
         // Check results
+        return this.getResultsFromAnswers(quiz, request.answers);
+    }
+    /**
+     * Check user's answers for the given quiz
+     *
+     * @param {Quiz} quiz
+     * @param {Player} player
+     * @return {score: number, maxScore, fails: *[]} Object containing results
+     */
+    getResultsFromAnswers(quiz, answers) {
+        // Check results
         let score = 0;
         const maxScore = quiz.questions.length;
         const fails = [];
         let i = 0;
-        for (; i < quiz.questions.length && request.answers.length; i++) {
-            if (quiz.questions[i].isAnswer(request.answers[i])) {
+        for (; i < quiz.questions.length && answers.length; i++) {
+            if (quiz.questions[i].isAnswer(answers[i])) {
                 score++;
             } else {
                 fails.push({
-                    userAnswer: request.answers[i],
+                    userAnswer: answers[i],
                     solution: quiz.questions[i].solution
                 });
             }

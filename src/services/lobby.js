@@ -11,10 +11,13 @@ class LobbyService {
      * Constructor
      *
      * @param lobbyDbService Lobby database service
+     * @param quizDbService Quiz database service
+     * @param quizService Quiz service
      */
-    constructor(lobbyDbService, quizDbService) {
+    constructor(lobbyDbService, quizDbService, quizService) {
         this.lobbyDbService = lobbyDbService;
         this.quizDbService = quizDbService;
+        this.quizService = quizService;
     }
 
     /**
@@ -113,7 +116,7 @@ class LobbyService {
         lobby.setPlayerAnswers(player, answers);
 
         // update the database
-        await this.lobbyDbService.updateLobbyPlayerAnswers(lobby, player, answers);
+        await this.lobbyDbService.updateLobbyPlayerAnswers(lobby);
     }
 
     /**
@@ -189,6 +192,36 @@ class LobbyService {
         });
 
         return questions;
+    }
+
+    /**
+    * Get player results of a given lobby
+    *
+    * @param lobbyId Lobby's id
+    * @return {Promise<[{question: string, choices: []}]>} Questions without solution
+    */
+    async getLobbyResults(lobbyId) {
+        // Retrieve lobby
+        const lobby = await this.lobbyDbService.findById(lobbyId);
+        if (!(lobby instanceof Lobby)) {
+            throw new Error("No lobby found for id: " + lobbyId);
+        }
+
+        const maxScore = lobby.quiz.questions.length;
+
+        // Format results
+        let scoreByPlayerName = lobby.players.map((player) => {
+            let pAnswers = lobby.answersByPlayerId[player.id];
+            if (!pAnswers) return { name: player.name, score: 0 };
+            let playerResults = this.quizService.getResultsFromAnswers(lobby.quiz, pAnswers);
+
+            return { name: player.name, score: playerResults.score };
+        });
+
+        // Sort scores
+        scoreByPlayerName = scoreByPlayerName.sort((a, b) => b.score - a.score);
+
+        return { scoreByPlayerName, maxScore };
     }
 
     /**

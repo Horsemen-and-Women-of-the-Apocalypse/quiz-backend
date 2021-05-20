@@ -136,7 +136,8 @@ describe("LobbyDbService", () => {
         // Add player lobby
         let p1 = new Player("momo");
         l1.addPlayer(p1);
-        await lobbyDbService.updateLobbyPlayerAnswers(l1, p1, [ "toto", "tata" ]);
+        l1.setPlayerAnswers(p1, [ "toto", "tata" ]);
+        await lobbyDbService.updateLobbyPlayerAnswers(l1);
 
         // Find altered lobby
         let myLobby = await lobbyDbService.findById(l1.id);

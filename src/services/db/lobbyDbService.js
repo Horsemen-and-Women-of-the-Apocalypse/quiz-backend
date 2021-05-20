@@ -128,15 +128,11 @@ class LobbyDbService {
      * @param {Player} player
      * @param {Array} answers
      *  */
-    async updateLobbyPlayerAnswers(lobby, player, answers) {
+    async updateLobbyPlayerAnswers(lobby) {
         if (!(lobby instanceof Lobby)) throw new Error("Unexpected type for the lobby");
-        if (!(player instanceof Player)) throw new Error("Unexpected type for the player");
-        if (!Array.isArray(answers)) throw new Error("Unexpected type for the answers");
 
-        let newAnswer = {};
-        newAnswer[player._id] = answers;
         await this.database.updateDocument(
-            { answersByPlayerId: newAnswer },
+            { answersByPlayerId: lobby.answersByPlayerId },
             lobby.id,
             LobbyDbService.getCollection()
         );
