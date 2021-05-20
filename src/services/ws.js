@@ -91,6 +91,20 @@ class WebsocketService {
 
         return { lobby, player };
     }
+
+    /**
+     * Send notifications to everyone
+     * 
+     * @param lobbyId Room id
+     * @param message Message to notify
+     */
+    broadcastLobby(lobbyId, message) {
+        if (typeof message !== "string") {
+            throw new Error("Message is not a string");
+        }
+
+        this.ws.to(lobbyId).emit("notify lobby", message);
+    }
 }
 
 export default WebsocketService;
