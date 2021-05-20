@@ -1,7 +1,6 @@
 import { HTTP } from "../../../common/apierrors";
 import { Route } from "../../route";
 import { Response } from "../../router";
-
 /**
  * Callback on /lobby/:id/info
  *
@@ -61,6 +60,38 @@ const addAnswers = async (services, request, response, next) => {
     }
 };
 
+
+/**
+ * Callback on /lobby/:id/join
+ *
+ * @param services Services
+ */
+const join = async (services, request, response, next) => {
+    try {
+        // Check lobby id
+        const lobbyId = request.param("id");
+        if (typeof lobbyId !== "string") {
+            throw new Error("Lobby id is undefined");
+        }
+
+        // Check body
+        if (!(request.body instanceof Object)) {
+            throw new Error(HTTP.BODY_UNDEFINED);
+        }
+
+        // Try to join a lobby
+        const join = await services.lobbyService.joinLobby(lobbyId, request.body);
+
+        // Notify everyone
+        services.ws.notifyPlayerJoin(lobbyId, request.body.playerName);
+
+        // Send join response
+        response.json(new Response(join));
+    } catch (e) {
+        next(e);
+    }
+};
+
 /**
  * Callback on /lobby/create
  *
@@ -88,6 +119,7 @@ const create = async (services, request, response, next) => {
 
 export default {
     "info": new Route(route => route + "/:id/info", "post", info),
+    "join": new Route(route => route + "/:id/join", "post", join),
     "addAnswer": new Route(route => route + "/:lobby_id/player/:player_id/answer", "post", addAnswers),
     "create": new Route(route => route + "/create", "post", create)
 };

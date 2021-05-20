@@ -17,6 +17,45 @@ class LobbyService {
     }
 
     /**
+     * Join an available lobby
+     *
+     * @param lobbyId Lobby id
+     * @param request Player name
+     * @return {Promise<{playerId: number}} Newly added player id
+     */
+    async joinLobby(lobbyId, request) {
+        // Check request body
+        const playerName = request.playerName;
+        if (!playerName) {
+            throw new Error("Undefined player name");
+        }
+
+        // Retrieve lobby
+        const lobby = await this.lobbyDbService.findById(lobbyId);
+
+        if (!(lobby instanceof Lobby)) {
+            throw new Error("No lobby found for id: " + lobbyId);
+        }
+
+        // Check lobby status
+        if (lobby.startDate) {
+            if (!lobby.endDate) {
+                throw new Error("Game already started");
+            } else {
+                throw new Error("Game ended");
+            }
+        }
+
+        // Add player to lobby
+        const player = new Player(playerName);
+        lobby.addPlayer(player);
+        await this.lobbyDbService.addPlayersToLobby(lobby, player);
+
+        // Return generated player id
+        return { playerId: player.id };
+    }
+
+    /**
      * Get lobby information depending on given player
      *
      * @param lobbyId Lobby id

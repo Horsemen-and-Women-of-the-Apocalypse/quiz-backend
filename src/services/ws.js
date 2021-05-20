@@ -91,6 +91,20 @@ class WebsocketService {
 
         return { lobby, player };
     }
+
+    /**
+     * Send a player join notifications to everyone
+     *
+     * @param lobbyId Room id
+     * @param playerName Message to notify
+     */
+    notifyPlayerJoin(lobbyId, playerName) {
+        if (typeof playerName !== "string") {
+            throw new Error("Message is not a string");
+        }
+
+        this.ws.to(lobbyId).emit("playerHasJoined", playerName);
+    }
 }
 
 export default WebsocketService;
