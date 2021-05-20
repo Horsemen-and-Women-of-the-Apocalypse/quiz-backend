@@ -195,11 +195,39 @@ const questions = async (services, request, response, next) => {
     }
 };
 
+/**
+ * Callback on /lobby/:id/results
+ *
+ * @param services Services
+ * @param request Request
+ * @param response Response
+ * @param next Next function
+ * @return {Promise<void>} Promise
+ */
+const results = async (services, request, response, next) => {
+    try {
+        // Check lobby's id
+        const lobbyId = request.param("id");
+        if (typeof lobbyId !== "string") {
+            throw new Error("Lobby's id is undefined");
+        }
+
+        // Get all questions from lobby's quiz
+        const results = await services.lobbyService.getLobbyResults(lobbyId);
+
+        // Send questions
+        response.json(new Response(results));
+    } catch (e) {
+        next(e);
+    }
+};
+
 export default {
     "info": new Route(route => route + "/:id/info", "post", info),
     "join": new Route(route => route + "/:id/join", "post", join),
     "addAnswer": new Route(route => route + "/:lobby_id/player/:player_id/answer", "post", addAnswers),
     "create": new Route(route => route + "/create", "post", create),
     "questions": new Route(route => route + "/:id/questions", "post", questions),
+    "results": new Route(route => route + "/:id/results", "get", results),
     "start": new Route(route => route + "/:id/start", "post", start)
 };

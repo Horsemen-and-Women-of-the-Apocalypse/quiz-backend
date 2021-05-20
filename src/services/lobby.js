@@ -15,16 +15,21 @@ class LobbyService {
      * Constructor
      *
      * @param lobbyDbService Lobby database service
+     * @param quizDbService Quiz database service
+     * @param quizService Quiz service
      * @param wsService Websocket service
      */
-    constructor(lobbyDbService, quizDbService, wsService) {
+    constructor(lobbyDbService, quizDbService, quizService, wsService) {
         this.lobbyDbService = lobbyDbService;
         this.quizDbService = quizDbService;
+        this.quizService = quizService;
         this.wsService = wsService;
 
         this.scheduledTaskByLobby = new Map();
         this.scheduledTaskByLobbySemaphore = new Semaphore(1);
+        this.answerSemaphore = new Semaphore(1);
     }
+
 
     /**
      * Join an available lobby
@@ -199,19 +204,30 @@ class LobbyService {
      * @param {array} answers
      */
     async addAnswers(lobbyId, playerId, answers) {
-        // Retrieve lobby
-        const lobby = await this.lobbyDbService.findById(lobbyId);
-        if (!(lobby instanceof Lobby)) throw new Error("No lobby found for id: " + lobbyId);
+        return new Promise(async (resolve, reject) => {
+            this.answerSemaphore.take(async () => {
+                try {
+                    // Retrieve lobby
+                    const lobby = await this.lobbyDbService.findById(lobbyId);
+                    if (!(lobby instanceof Lobby)) throw new Error("No lobby found for id: " + lobbyId);
 
-        // Retrieve lobby player
-        const player = lobby.players.find(p => p.id === playerId);
-        if (!(player instanceof Player)) throw new Error("No player with id: " + playerId + " found in the lobby");
+                    // Retrieve lobby player
+                    const player = lobby.players.find(p => p.id === playerId);
+                    if (!(player instanceof Player)) throw new Error("No player with id: " + playerId + " found in the lobby");
 
-        // update the lobby
-        lobby.setPlayerAnswers(player, answers);
+                    // update the lobby
+                    lobby.setPlayerAnswers(player, answers);
 
-        // update the database
-        await this.lobbyDbService.updateLobbyPlayerAnswers(lobby, player, answers);
+                    // update the database
+                    await this.lobbyDbService.updateLobbyPlayerAnswers(lobby);
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                } finally {
+                    this.answerSemaphore.leave();
+                }
+            });
+        });
     }
 
     /**
@@ -287,6 +303,36 @@ class LobbyService {
         });
 
         return questions;
+    }
+
+    /**
+    * Get player results of a given lobby
+    *
+    * @param lobbyId Lobby's id
+    * @return {Promise<[{question: string, choices: []}]>} Questions without solution
+    */
+    async getLobbyResults(lobbyId) {
+        // Retrieve lobby
+        const lobby = await this.lobbyDbService.findById(lobbyId);
+        if (!(lobby instanceof Lobby)) {
+            throw new Error("No lobby found for id: " + lobbyId);
+        }
+
+        const maxScore = lobby.quiz.questions.length;
+
+        // Format results
+        let scoreByPlayerName = lobby.players.map((player) => {
+            let pAnswers = lobby.answersByPlayerId[player.id];
+            if (!pAnswers) return { name: player.name, score: 0 };
+            let playerResults = this.quizService.getResultsFromAnswers(lobby.quiz, pAnswers);
+
+            return { name: player.name, score: playerResults.score };
+        });
+
+        // Sort scores
+        scoreByPlayerName = scoreByPlayerName.sort((a, b) => b.score - a.score);
+
+        return { scoreByPlayerName, maxScore };
     }
 
     /**

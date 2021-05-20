@@ -87,7 +87,8 @@ const init = async (server, database) => {
 
     const ws = new WebsocketService(lobbyDbService);
     ws.init(server);
-    const lobbyService = new LobbyService(lobbyDbService, quizdbService, ws);
+
+    const lobbyService = new LobbyService(lobbyDbService, quizdbService, quizService, ws);
 
     return new ServiceContainer(ws, quizdbService, quizService, lobbyDbService, lobbyService);
 };
