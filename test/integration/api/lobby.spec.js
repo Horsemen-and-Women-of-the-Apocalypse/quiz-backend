@@ -5,9 +5,12 @@ import { database } from "../../../src";
 import { Player } from "../../../src/models/player";
 import QuizService from "../../../src/services/db/quiz";
 import LobbyDbService from "../../../src/services/db/lobbyDbService";
+import io from "socket.io-client";
 import { createLobby } from "../../common/utils";
 import { parseJSONResponse } from "../../test-utils/http";
 import { SERVER_URL, LOBBY_INFORMATION_ROUTE, LOBBY_JOIN_ROUTE } from "../../test-utils/server";
+import { BCAST } from "../../../src/common/notifications";
+import WebsocketService from "../../../src/services/ws";
 
 let lobby;
 let quizService;
@@ -82,14 +85,35 @@ describe("LobbyAPI", () => {
 
         it("Join an available lobby", async () => {
             const playerName = "Bob";
-            const response = await chai.request(SERVER_URL).put(LOBBY_JOIN_ROUTE(lobbyId)).send({ playerName: playerName });
 
-            chai.assert.equal(response.status, 200);
-            const dbLobby = await lobbyService.findById(lobbyId);
-            const addedPlayer = dbLobby.players.find(item => item.name === playerName);
+            const beforeDbLobby = await lobbyService.findById(lobbyId);
 
-            chai.assert.instanceOf(addedPlayer, Player);
-            chai.assert.equal(parseJSONResponse(response).data.playerId, addedPlayer.id);
+            // Add owner to listening
+            const socket = io(SERVER_URL, {
+                path: WebsocketService.RELATIVE_PATH,
+                query: {
+                    lobbyId: lobbyId,
+                    playerId: beforeDbLobby.owner.id,
+                }
+            });
+
+            const socketResponse = await new Promise(async (resolve) => {
+                // Check lobby notification
+                socket.on("notify lobby", (arg) => {
+                    chai.assert.equal(arg, BCAST.LOBBY_NEW_PLAYER(playerName));
+                    resolve(true);
+                });
+                socket.on("error", resolve);
+                const response = await chai.request(SERVER_URL).put(LOBBY_JOIN_ROUTE(lobbyId)).send({ playerName: playerName });
+                
+                chai.assert.equal(response.status, 200);
+                const dbLobby = await lobbyService.findById(lobbyId);
+                const addedPlayer = dbLobby.players.find(item => item.name === playerName);
+                chai.assert.instanceOf(addedPlayer, Player);
+                chai.assert.equal(parseJSONResponse(response).data.playerId, addedPlayer.id);
+            });
+            chai.assert.isTrue(socketResponse === true);
+            socket.close();
         });
     });
 
