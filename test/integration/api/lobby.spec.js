@@ -9,7 +9,7 @@ import io from "socket.io-client";
 import { createLobby } from "../../common/utils";
 import { parseJSONResponse } from "../../test-utils/http";
 import WebsocketService from "../../../src/services/ws";
-import { SERVER_URL, LOBBY_INFORMATION_ROUTE, LOBBY_JOIN_ROUTE, LOBBY_POST_ANSWER_ROUTE, LOBBY_CREATE_ROUTE } from "../../test-utils/server";
+import { SERVER_URL, LOBBY_INFORMATION_ROUTE, LOBBY_JOIN_ROUTE, LOBBY_POST_ANSWER_ROUTE, LOBBY_CREATE_ROUTE, LOBBY_QUESTIONS_ROUTE } from "../../test-utils/server";
 import { Lobby } from "../../../src/models/lobby";
 
 let lobby;
@@ -20,7 +20,7 @@ describe("LobbyAPI", () => {
     let lobbyId;
     let quizId;
 
-    before(async () => {
+    before(() => {
         quizService = new QuizService(database);
         lobbyService = new LobbyDbService(database, quizService);
     });
@@ -264,6 +264,80 @@ describe("LobbyAPI", () => {
             chai.assert.isNotNull(json.quiz.id);
             chai.assert.equal(json.quiz.id, dbQuiz.id);
             chai.assert.equal(lobby.quiz.name, dbQuiz.name);
+        });
+    });
+    describe("/lobby/:id/questions", () => {
+        it("Send undefined payload", async () => {
+            const response = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(lobbyId)).send();
+
+            chai.assert.equal(response.status, 500);
+        });
+
+        it("Send malformed questions request", async () => {
+            const response1 = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: [] });
+            chai.assert.equal(response1.status, 500);
+
+            const response2 = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ foo: "bar" });
+            chai.assert.equal(response2.status, 500);
+        });
+
+        it("Return an error because of unknown lobby", async () => {
+            const response = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(new ObjectID().toString())).send({ playerId: lobby.players[0]._id });
+
+            chai.assert.equal(response.status, 500);
+        });
+
+        it("Return an error because of unknown player", async () => {
+            const response = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: "unauthorized" });
+
+            chai.assert.equal(response.status, 500);
+        });
+
+        it("Return an error because lobby did not start", async () => {
+            const response = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: lobby.players[0]._id });
+
+            chai.assert.equal(response.status, 500);
+        });
+
+        it("Return an error because lobby ended", async () => {
+            // Start lobby
+            lobby.start();
+            await lobbyService.updatelobbyStartDate(lobby);
+
+            // End lobby
+            lobby.end();
+            await lobbyService.updatelobbyEndDate(lobby);
+
+            const response = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: lobby.players[0]._id });
+
+            chai.assert.equal(response.status, 500);
+        });
+
+        it("Return all questions of a lobby already start", async () => {
+            // Start lobby
+            lobby.start();
+            await lobbyService.updatelobbyStartDate(lobby);
+
+            const response = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: lobby.players[0]._id });
+            const expectedQuestions = lobby.quiz.questions.map(item => {
+                return {
+                    "question": item.question,
+                    "choices": item.choices
+                };
+            });
+
+            chai.assert.equal(response.status, 200);
+            chai.assert.sameDeepMembers(parseJSONResponse(response).data, expectedQuestions);
+        });
+
+        it("Return an error because lobby is corrupted", async () => {
+            // End lobby
+            lobby.end();
+            await lobbyService.updatelobbyEndDate(lobby);
+
+            const response = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: lobby.players[0]._id });
+
+            chai.assert.equal(response.status, 500);
         });
     });
 });
