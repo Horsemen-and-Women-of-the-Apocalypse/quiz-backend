@@ -1,6 +1,8 @@
+import QuizDatabaseService from "./db/quiz";
+import QuizService from "./quiz";
 import WebsocketService from "./ws";
-import QuizService from "./quiz/QuizService";
-import LobbyService from "./lobby/lobbyService";
+import LobbyDbService from "./db/lobbyDbService";
+
 
 /**
  * Service container
@@ -9,12 +11,14 @@ class ServiceContainer {
     /**
      * Constructor
      * @param ws {WebsocketService} Websocket service
+     * @param quizDbService {QuizDatabaseService} Quiz database service
      * @param quizService {QuizService} Quiz service
      */
-    constructor(ws,quizService, lobbyService) {
+    constructor(ws, quizDbService, quizService, lobbyDbService) {
         this._ws = ws;
+        this._quizDbService = quizDbService;
         this._quizService = quizService;
-        this._lobbyService = lobbyService;
+        this._lobbyDbService = lobbyDbService;
     }
 
     /**
@@ -27,9 +31,18 @@ class ServiceContainer {
     }
 
     /**
+     * Get quiz database service
+     *
+     * @return {QuizDatabaseService} Quiz database service
+     */
+    get quizDbService() {
+        return this._quizDbService;
+    }
+
+    /**
      * Get quiz service
      *
-     * @return {QuizService} Service
+     * @return {QuizService} Quiz service
      */
     get quizService() {
         return this._quizService;
@@ -38,10 +51,10 @@ class ServiceContainer {
     /**
      * Get quiz service
      *
-     * @return {LobbyService} Service
+     * @return {LobbyDbService} Service
      */
-    get lobbyService() {
-        return this._lobbyService;
+    get lobbyDbService() {
+        return this._lobbyDbService;
     }
 }
 
@@ -49,6 +62,7 @@ class ServiceContainer {
  * Init services container
  *
  * @param {Server} server HTTP server
+ * @param database Database service
  * @return {Promise<ServiceContainer>} Services container
  */
 const init = async (server, database) => {
@@ -56,14 +70,12 @@ const init = async (server, database) => {
     const ws = new WebsocketService();
     ws.init(server);
 
-    // Quiz service
-    const quizService = new QuizService(database);
-    await quizService.init();
+    const quizdbService = new QuizDatabaseService(database);
+    await quizdbService.init();
+    const quizService = new QuizService(quizdbService);
+    const lobbyDbService = new LobbyDbService(database, quizdbService);
 
-    // Lobby service
-    const lobbyService = new LobbyService(database, quizService);
-
-    return new ServiceContainer(ws,quizService, lobbyService);
+    return new ServiceContainer(ws, quizdbService, quizService, lobbyDbService);
 };
 
 export default init;
