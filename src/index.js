@@ -6,9 +6,9 @@ import Semaphore from "semaphore";
 import serverConfig from "./config/server";
 import { init as initRoutes, Response } from "./router/router";
 import initServices from "./services";
+import MongoDB from "./services/db/db";
 import { LOGGER, path } from "./utils";
 import { DEVELOPMENT_MODE, environment } from "./utils/node";
-import MongoDB from "./services/db/db";
 
 // Create application & websocket
 const app = express();
@@ -36,7 +36,8 @@ const startSemaphore = new Semaphore(1);
 startSemaphore.take(() => {
 });
 
-var database;
+let database;
+let services;
 
 // Start app
 server.listen(serverConfig.port, async () => {
@@ -50,7 +51,7 @@ server.listen(serverConfig.port, async () => {
         LOGGER.info("[Main] Connected successfully to the MongoDB database");
 
         // Init services here
-        const services = await initServices(server,database);
+        services = await initServices(server, database);
 
         // Set-up routes
         initRoutes(app, services, path(__dirname, "router", "routes"));
@@ -73,4 +74,4 @@ server.listen(serverConfig.port, async () => {
     }
 });
 
-export { server, database, startSemaphore };
+export { server, database, services, startSemaphore };

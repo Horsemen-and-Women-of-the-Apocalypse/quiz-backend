@@ -1,6 +1,7 @@
 import { HTTP } from "../../../common/apierrors";
 import { Route } from "../../route";
 import { Response } from "../../router";
+
 /**
  * Callback on /lobby/:id/info
  *
@@ -34,6 +35,37 @@ const info = async (services, request, response, next) => {
 };
 
 /**
+ * Callback on /lobby/:id/start
+ *
+ * @param services Service container
+ * @param request Request
+ * @param response Response
+ * @param next Next function
+ * @return {Promise<void>} Promise
+ */
+const start = async (services, request, response, next) => {
+    try {
+        // Check lobby id
+        const lobbyId = request.param("id");
+        if (typeof lobbyId !== "string") {
+            throw new Error("Lobby id is undefined");
+        }
+
+        // Check body
+        if (!(request.body instanceof Object)) {
+            throw new Error(HTTP.BODY_UNDEFINED);
+        }
+
+        // Start lobby
+        await services.lobbyService.start(lobbyId, request.body);
+
+        response.json(Response.OK);
+    } catch (e) {
+        next(e);
+    }
+};
+
+/**
  * Callback on post /lobby/:lobby_id/player/:player_id/answer
  *
  * @param services Services
@@ -59,7 +91,6 @@ const addAnswers = async (services, request, response, next) => {
         next(e);
     }
 };
-
 
 /**
  * Callback on /lobby/:id/join
@@ -169,5 +200,6 @@ export default {
     "join": new Route(route => route + "/:id/join", "post", join),
     "addAnswer": new Route(route => route + "/:lobby_id/player/:player_id/answer", "post", addAnswers),
     "create": new Route(route => route + "/create", "post", create),
-    "questions": new Route(route => route + "/:id/questions", "post", questions)
+    "questions": new Route(route => route + "/:id/questions", "post", questions),
+    "start": new Route(route => route + "/:id/start", "post", start)
 };

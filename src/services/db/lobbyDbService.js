@@ -34,8 +34,8 @@ class LobbyDbService {
     /**
      * Constructor
      *
-     * @param {quizDB} database Object, ref to Mongo database
-     * @param {QuizService} quizService Object, ref to Quiz service
+     * @param {DatabaseService} database Object, ref to Mongo database
+     * @param {QuizDatabaseService} quizService Object, ref to Quiz service
      */
     constructor(database, quizService) {
         this.database = database;

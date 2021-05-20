@@ -1,4 +1,8 @@
+import ms from "ms";
+import Semaphore from "semaphore";
+import applicationConfig from "../config/application";
 import { Lobby } from "../models/lobby";
+import { LOGGER } from "../utils";
 import { Player } from "../models/player";
 import moment from "moment";
 
@@ -11,10 +15,15 @@ class LobbyService {
      * Constructor
      *
      * @param lobbyDbService Lobby database service
+     * @param wsService Websocket service
      */
-    constructor(lobbyDbService, quizDbService) {
+    constructor(lobbyDbService, quizDbService, wsService) {
         this.lobbyDbService = lobbyDbService;
         this.quizDbService = quizDbService;
+        this.wsService = wsService;
+
+        this.scheduledTaskByLobby = new Map();
+        this.scheduledTaskByLobbySemaphore = new Semaphore(1);
     }
 
     /**
@@ -89,8 +98,97 @@ class LobbyService {
             name: lobby.name,
             quizName: lobby.quiz.name,
             ownerName: lobby.owner.name,
-            playerNames: lobby.players.map(item => { return item.name; })
+            playerNames: lobby.players.map(item => {
+                return item.name;
+            })
         };
+    }
+
+    /**
+     * Start the given lobby
+     *
+     * @param lobbyId Lobby's id
+     * @param request Start request
+     * @return {Promise<void>} Promise
+     */
+    async start(lobbyId, request) {
+        // Check start request
+        const playerId = request.playerId;
+        if (typeof playerId !== "string") {
+            throw new Error("Malformed player id");
+        }
+
+        // Find lobby
+        const lobby = await this.lobbyDbService.findById(lobbyId);
+        if (lobby == null) {
+            throw new Error("No lobby found for id: " + lobbyId);
+        }
+
+        // Check player rights
+        if (lobby.owner.id !== playerId) {
+            throw new Error("Insufficient rights to start a lobby");
+        }
+
+        // Update lobby's start date
+        lobby.start();
+        await this.lobbyDbService.updatelobbyStartDate(lobby);
+
+        // Notify players
+        await this.wsService.notifyLobbyStart(lobby.id);
+        LOGGER.info("Start lobby: " + lobbyId);
+
+        // Schedule lobby end
+        this.scheduledTaskByLobbySemaphore.take(() => {
+            try {
+                this.scheduledTaskByLobby.set(lobbyId, setTimeout(async () => {
+                    try {
+                        // Update lobby's end date
+                        lobby.end();
+                        await this.lobbyDbService.updatelobbyEndDate(lobby);
+
+                        // Notify end
+                        await this.wsService.notifyLobbyEnd(lobbyId);
+                    } catch (e) {
+                        LOGGER.exception(e);
+                    } finally {
+                        // Remove scheduled task
+                        this.scheduledTaskByLobbySemaphore.take(() => {
+                            try {
+                                this.scheduledTaskByLobby.delete(lobbyId);
+                            } finally {
+                                this.scheduledTaskByLobbySemaphore.leave();
+                            }
+                        });
+
+                        LOGGER.info("End lobby: " + lobbyId);
+                    }
+                }, ms(applicationConfig.lobbyDuration)));
+            } finally {
+                this.scheduledTaskByLobbySemaphore.leave();
+            }
+        });
+    }
+
+    /**
+     * Test whether there is no scheduled tasks
+     *
+     * @return {Promise<boolean>} Promise containing true
+     * if there is no scheduled tasks, false otherwise
+     */
+    async noScheduledTasks() {
+        return new Promise(((resolve, reject) => {
+            try {
+                this.scheduledTaskByLobbySemaphore.take(() => {
+                    try {
+                        resolve(this.scheduledTaskByLobby.size === 0);
+                    } finally {
+                        this.scheduledTaskByLobbySemaphore.leave();
+                    }
+                });
+            } catch (e) {
+                reject(e);
+            }
+        }));
     }
 
     /**
@@ -159,11 +257,11 @@ class LobbyService {
     }
 
     /**
-    * Get questions of a given lobby
-    *
-    * @param lobbyId >Lobby's id
-    * @return {Promise<[{question: string, choices: []}]>} Questions without solution
-    */
+     * Get questions of a given lobby
+     *
+     * @param lobbyId >Lobby's id
+     * @return {Promise<[{question: string, choices: []}]>} Questions without solution
+     */
     async getLobbyQuestions(lobbyId) {
         // Retrieve lobby
         const lobby = await this.lobbyDbService.findById(lobbyId);
