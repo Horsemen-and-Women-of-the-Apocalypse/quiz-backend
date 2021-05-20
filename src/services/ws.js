@@ -37,10 +37,7 @@ class WebsocketService {
      */
     async middleware(socket, next) {
         try {
-            let { player, lobby } = await this.checkUserAccess(socket.handshake.query);
-            socket.data = {};
-            socket.data.player = player;
-            socket.data.lobby = lobby;
+            await this.checkUserAccess(socket.handshake.query);
             next();
         } catch (error) {
             LOGGER.warn("[WS] Failed websocket connection : " + error.message);
@@ -77,8 +74,8 @@ class WebsocketService {
      * @param {object} query
      */
     async checkUserAccess(query) {
-        if (!query || !query.playerId) throw new AuthError(AUTH.ACCESS_DENIED + " a playerId is requiered");
-        if (!query.lobbyId) throw new AuthError(AUTH.ACCESS_DENIED + " a lobbyId is requiered");
+        if (!query || !query.playerId) throw new AuthError(AUTH.ACCESS_DENIED + " a playerId is required");
+        if (!query.lobbyId) throw new AuthError(AUTH.ACCESS_DENIED + " a lobbyId is required");
 
         // Check Credentials with DB
         const lobby = await this.lobbyDbService.findById(query.lobbyId);
@@ -86,8 +83,6 @@ class WebsocketService {
 
         const player = lobby.players.find(p => p.id === query.playerId);
         if (!player) throw new AuthError(AUTH.ACCESS_DENIED + " Player is not in the lobby");
-
-        return { player: player, lobby: lobby };
     }
 }
 
