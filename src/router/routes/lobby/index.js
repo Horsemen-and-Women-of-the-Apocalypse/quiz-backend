@@ -4,8 +4,8 @@ import { Response } from "../../router";
 
 /**
  * Callback on /lobby/:id/info
- * 
- * @param services Services 
+ *
+ * @param services Services
  * @param request Request
  * @param response Response
  * @param next Next function
@@ -35,5 +35,5 @@ const info = async (services, request, response, next) => {
 };
 
 export default {
-    "info": new Route(route => route + "/:id/info", "get", info)
+    "info": new Route(route => route + "/:id/info", "post", info)
 };
