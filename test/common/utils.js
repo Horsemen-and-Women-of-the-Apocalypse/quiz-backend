@@ -2,6 +2,9 @@ import { Quiz } from "../../src/models/quiz";
 import { StringMultipleChoiceQuestion } from "../../src/models/question";
 import { Player } from "../../src/models/player";
 import { Lobby } from "../../src/models/lobby";
+import QuizDbService from "../../src/services/db/quiz";
+import LobbyDbService from "../../src/services/db/lobbyDbService";
+import { database } from "../../src";
 
 /**
  *
@@ -46,5 +49,32 @@ function createLobby() {
     const p3 = new Player("tutu");
     return new Lobby(lobbyName, q, p1, [ p2, p3 ]);
 }
+/**
+ *
+* @return {Promise<{quizDbService: QuizDbService, lobbyDbService:LobbyDbService}>} Results
+ */
+async function clearDatabase() {
+    const quizDbService = new QuizDbService(database);
+    const lobbyDbService = new LobbyDbService(database, quizDbService);
 
-export { createQuiz, createLobby };
+    await quizDbService.dropCollection();
+    await lobbyDbService.dropCollection();
+
+    return { quizDbService, lobbyDbService };
+}
+
+/**
+* @return {Promise<{lobby: Lobby} Results
+ */
+async function insertLobby() {
+    const quizDbService = new QuizDbService(database);
+    const lobbyDbService = new LobbyDbService(database, quizDbService);
+    const l = createLobby();
+
+    await quizDbService.addQuiz(l.quiz);
+    await lobbyDbService.addLobby(l);
+
+    return l;
+}
+
+export { createQuiz, createLobby, clearDatabase, insertLobby };

@@ -5,6 +5,14 @@ import LOGGER from "../utils/logger";
 
 class WebsocketService {
     /**
+     *
+     * @param {LobbyDbService} lobbyDbService
+     */
+    constructor(lobbyDbService) {
+        this.lobbyDbService = lobbyDbService;
+    }
+
+    /**
      * Initialize websocket
      *
      * @param server {Server} HTTP server
@@ -14,10 +22,10 @@ class WebsocketService {
         LOGGER.info("[WS] Websocket opened on localhost" + this.ws._path);
 
         // Define middleware
-        this.ws.use(this.middleware);
+        this.ws.use((socket, next) => { this.middleware(socket, next); });
 
         // Define connection callback
-        this.ws.on("connect", this.onConnection);
+        this.ws.on("connection", this.onConnection);
     }
 
     /**
@@ -28,8 +36,13 @@ class WebsocketService {
      * @return {Promise<void>} Promise
      */
     async middleware(socket, next) {
-        // Reject packet
-        next(new AuthError(AUTH.ACCESS_DENIED));
+        try {
+            await this.checkUserAccess(socket.handshake.query);
+            next();
+        } catch (error) {
+            LOGGER.warn("[WS] Failed websocket connection : " + error.message);
+            next(error);
+        }
     }
 
     /**
@@ -40,7 +53,7 @@ class WebsocketService {
     onConnection(client) {
         LOGGER.info("[WS] Connection opened with " + client.handshake.address);
 
-        client.emit("connection", "CONNECTION_OPENED");
+        client.emit("connection", "CONNECTION_OPENED, connected to the lobby");
 
         client.on("disconnect", () => {
             LOGGER.info("[WS] Connection closed with " + client.handshake.address);
@@ -54,6 +67,22 @@ class WebsocketService {
      */
     static get RELATIVE_PATH() {
         return "/ws";
+    }
+
+    /**
+     * Check the user given credentials at each messages
+     * @param {object} query
+     */
+    async checkUserAccess(query) {
+        if (!query || !query.playerId) throw new AuthError(AUTH.ACCESS_DENIED + " a playerId is required");
+        if (!query.lobbyId) throw new AuthError(AUTH.ACCESS_DENIED + " a lobbyId is required");
+
+        // Check Credentials with DB
+        const lobby = await this.lobbyDbService.findById(query.lobbyId);
+        if (!lobby) throw new AuthError(AUTH.ACCESS_DENIED + " Lobby not found");
+
+        const player = lobby.players.find(p => p.id === query.playerId);
+        if (!player) throw new AuthError(AUTH.ACCESS_DENIED + " Player is not in the lobby");
     }
 }
 
