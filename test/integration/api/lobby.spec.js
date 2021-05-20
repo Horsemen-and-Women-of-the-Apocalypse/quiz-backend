@@ -103,7 +103,7 @@ describe("LobbyAPI", () => {
         });
 
 
-        it("Send malformed answers", async () => {
+        it("Send malformed creation request", async () => {
             const response1 = await chai.request(SERVER_URL).post(LOBBY_CREATE_ROUTE).send({ playerId: [] });
             chai.assert.equal(response1.status, 500);
 
@@ -127,14 +127,17 @@ describe("LobbyAPI", () => {
 
             chai.assert.equal(json.name, "stahp");
             chai.assert.equal(json.owner.name, "josef");
-            //chai.assert.isTrue((json.owner.id instanceof String) && json.owner.id.length > 0);
-            //chai.assert.isTrue((json.id instanceof String) && json.id.length > 0);
 
             const dbLobby = await lobbyService.findById(json.id);
             chai.assert.instanceOf(dbLobby, Lobby);
-
+            chai.assert.isNotNull(json.owner.id);
             chai.assert.equal(dbLobby.owner.id, json.owner.id);
             chai.assert.equal(dbLobby.owner.name, json.owner.name);
+
+            const dbQuiz = await quizService.findById(json.quiz.id);
+            chai.assert.isNotNull(json.quiz.id);
+            chai.assert.equal(json.quiz.id, dbQuiz.id);
+            chai.assert.equal(lobby.quiz.name, dbQuiz.name);
         });
     });
 });
