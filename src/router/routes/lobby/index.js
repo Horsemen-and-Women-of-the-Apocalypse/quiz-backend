@@ -169,5 +169,5 @@ export default {
     "join": new Route(route => route + "/:id/join", "post", join),
     "addAnswer": new Route(route => route + "/:lobby_id/player/:player_id/answer", "post", addAnswers),
     "create": new Route(route => route + "/create", "post", create),
-    "questions": new Route(route => route + "/:id/questions", "get", questions)
+    "questions": new Route(route => route + "/:id/questions", "post", questions)
 };

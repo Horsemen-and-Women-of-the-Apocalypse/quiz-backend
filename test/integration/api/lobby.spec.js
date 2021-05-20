@@ -268,33 +268,33 @@ describe("LobbyAPI", () => {
     });
     describe("/lobby/:id/questions", () => {
         it("Send undefined payload", async () => {
-            const response = await chai.request(SERVER_URL).get(LOBBY_QUESTIONS_ROUTE(lobbyId)).send();
+            const response = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(lobbyId)).send();
 
             chai.assert.equal(response.status, 500);
         });
 
-        it("Send malformed answers", async () => {
-            const response1 = await chai.request(SERVER_URL).get(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: [] });
+        it("Send malformed questions request", async () => {
+            const response1 = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: [] });
             chai.assert.equal(response1.status, 500);
 
-            const response2 = await chai.request(SERVER_URL).get(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ foo: "bar" });
+            const response2 = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ foo: "bar" });
             chai.assert.equal(response2.status, 500);
         });
 
         it("Return an error because of unknown lobby", async () => {
-            const response = await chai.request(SERVER_URL).get(LOBBY_QUESTIONS_ROUTE(new ObjectID().toString())).send({ playerId: lobby.players[0]._id });
+            const response = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(new ObjectID().toString())).send({ playerId: lobby.players[0]._id });
 
             chai.assert.equal(response.status, 500);
         });
 
         it("Return an error because of unknown player", async () => {
-            const response = await chai.request(SERVER_URL).get(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: "unauthorized" });
+            const response = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: "unauthorized" });
 
             chai.assert.equal(response.status, 500);
         });
 
         it("Return an error because lobby did not start", async () => {
-            const response = await chai.request(SERVER_URL).get(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: lobby.players[0]._id });
+            const response = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: lobby.players[0]._id });
 
             chai.assert.equal(response.status, 500);
         });
@@ -308,7 +308,7 @@ describe("LobbyAPI", () => {
             lobby.end();
             await lobbyService.updatelobbyEndDate(lobby);
 
-            const response = await chai.request(SERVER_URL).get(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: lobby.players[0]._id });
+            const response = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: lobby.players[0]._id });
 
             chai.assert.equal(response.status, 500);
         });
@@ -318,7 +318,7 @@ describe("LobbyAPI", () => {
             lobby.start();
             await lobbyService.updatelobbyStartDate(lobby);
 
-            const response = await chai.request(SERVER_URL).get(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: lobby.players[0]._id });
+            const response = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: lobby.players[0]._id });
             const expectedQuestions = lobby.quiz.questions.map(item => {
                 return {
                     "question": item.question,
@@ -335,7 +335,7 @@ describe("LobbyAPI", () => {
             lobby.end();
             await lobbyService.updatelobbyEndDate(lobby);
 
-            const response = await chai.request(SERVER_URL).get(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: lobby.players[0]._id });
+            const response = await chai.request(SERVER_URL).post(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: lobby.players[0]._id });
 
             chai.assert.equal(response.status, 500);
         });
