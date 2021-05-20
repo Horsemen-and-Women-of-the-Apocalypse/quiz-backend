@@ -1,8 +1,8 @@
-import QuizDatabaseService from "./db/quiz";
-import QuizService from "./quiz";
-import WebsocketService from "./ws";
 import LobbyDbService from "./db/lobbyDbService";
+import QuizDatabaseService from "./db/quiz";
 import LobbyService from "./lobby";
+import QuizService from "./quiz";
+import { WebsocketService } from "./ws";
 
 /**
  * Service container
@@ -83,10 +83,10 @@ const init = async (server, database) => {
     const quizdbService = new QuizDatabaseService(database);
     const quizService = new QuizService(quizdbService);
     const lobbyDbService = new LobbyDbService(database, quizdbService);
-    const lobbyService = new LobbyService(lobbyDbService);
 
     const ws = new WebsocketService(lobbyDbService);
     ws.init(server);
+    const lobbyService = new LobbyService(lobbyDbService, ws);
 
     return new ServiceContainer(ws, quizdbService, quizService, lobbyDbService, lobbyService);
 };

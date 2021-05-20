@@ -1,11 +1,11 @@
 import chai from "chai";
 import { describe, it } from "mocha";
+import { ObjectID } from "mongodb";
 import io from "socket.io-client";
 import { AUTH } from "../../../src/common/apierrors";
-import WebsocketService from "../../../src/services/ws";
-import { SERVER_URL } from "../../test-utils/server";
+import { WebsocketService } from "../../../src/services/ws";
 import { clearDatabase, insertLobby } from "../../common/utils";
-import { ObjectID } from "mongodb";
+import { SERVER_URL } from "../../test-utils/server";
 
 describe("API", () => {
     describe("Websocket", () => {

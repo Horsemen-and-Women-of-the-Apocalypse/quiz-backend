@@ -4,8 +4,8 @@ import { Response } from "../../router";
 
 /**
  * Callback on /lobby/:id/info
- * 
- * @param services Services 
+ *
+ * @param services Services
  * @param request Request
  * @param response Response
  * @param next Next function
@@ -34,6 +34,38 @@ const info = async (services, request, response, next) => {
     }
 };
 
+/**
+ * Callback on /lobby/:id/start
+ *
+ * @param services Service container
+ * @param request Request
+ * @param response Response
+ * @param next Next function
+ * @return {Promise<void>} Promise
+ */
+const start = async (services, request, response, next) => {
+    try {
+        // Check lobby id
+        const lobbyId = request.param("id");
+        if (typeof lobbyId !== "string") {
+            throw new Error("Lobby id is undefined");
+        }
+
+        // Check body
+        if (!(request.body instanceof Object)) {
+            throw new Error(HTTP.BODY_UNDEFINED);
+        }
+
+        // Start lobby
+        await services.lobbyService.start(lobbyId, request.body);
+
+        response.json(Response.OK);
+    } catch (e) {
+        next(e);
+    }
+};
+
 export default {
-    "info": new Route(route => route + "/:id/info", "get", info)
+    "info": new Route(route => route + "/:id/info", "get", info),
+    "start": new Route(route => route + "/:id/start", "post", start)
 };

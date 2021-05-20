@@ -34,8 +34,8 @@ class LobbyDbService {
     /**
      * Constructor
      *
-     * @param {quizDB} database Object, ref to Mongo database
-     * @param {QuizService} quizService Object, ref to Quiz service
+     * @param {DatabaseService} database Object, ref to Mongo database
+     * @param {QuizDatabaseService} quizService Object, ref to Quiz service
      */
     constructor(database, quizService) {
         this.database = database;
@@ -94,7 +94,7 @@ class LobbyDbService {
     /**
      * @param {Lobby} lobby
      *  */
-    async updateLobyStartDate(lobby) {
+    async updateLobbyStartDate(lobby) {
         if (!(lobby instanceof Lobby)) throw new Error("Unexpected type for the lobby");
         await this.database.updateDocument(
             { startDate: convertMomentToTimestamp(lobby.startDate) },
@@ -105,7 +105,7 @@ class LobbyDbService {
     /**
      * @param {Lobby} lobby
      *  */
-    async updateLobyEndDate(lobby) {
+    async updateLobbyEndDate(lobby) {
         if (!(lobby instanceof Lobby)) throw new Error("Unexpected type for the lobby");
         await this.database.updateDocument(
             { endDate: convertMomentToTimestamp(lobby.endDate) },

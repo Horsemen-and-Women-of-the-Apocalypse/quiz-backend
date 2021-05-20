@@ -81,7 +81,7 @@ describe("LobbyDbService", () => {
 
         // Start lobby
         l1.start();
-        await lobbyDbService.updateLobyStartDate(l1);
+        await lobbyDbService.updateLobbyStartDate(l1);
 
         assert.isNotNull(l1.startDate);
         assert.isNull(l1.endDate);
@@ -94,7 +94,7 @@ describe("LobbyDbService", () => {
 
         // End lobby
         l1.end();
-        await lobbyDbService.updateLobyEndDate(l1);
+        await lobbyDbService.updateLobbyEndDate(l1);
 
         assert.isNotNull(l1.startDate);
         assert.isNotNull(l1.endDate);

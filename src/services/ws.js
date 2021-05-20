@@ -3,6 +3,11 @@ import { AUTH } from "../common/apierrors";
 import AuthError from "../common/autherror";
 import LOGGER from "../utils/logger";
 
+const EVENTS = {
+    LOBBY_START: "lobby-start",
+    LOBBY_END: "lobby-end"
+};
+
 class WebsocketService {
     /**
      *
@@ -22,10 +27,14 @@ class WebsocketService {
         LOGGER.info("[WS] Websocket opened on localhost" + this.ws._path);
 
         // Define middleware
-        this.ws.use((socket, next) => { this.middleware(socket, next); });
+        this.ws.use((socket, next) => {
+            return this.middleware(socket, next);
+        });
 
         // Define connection callback
-        this.ws.on("connection", (client) => { this.onConnection(client); });
+        this.ws.on("connection", (client) => {
+            this.onConnection(client);
+        });
     }
 
     /**
@@ -91,6 +100,26 @@ class WebsocketService {
 
         return { lobby, player };
     }
+
+    /**
+     * Notify players of the start of the given lobby
+     *
+     * @param lobbyId Lobby's id
+     * @return {Promise<void>} Promise
+     */
+    async notifyLobbyStart(lobbyId) {
+        await this.ws.to(lobbyId).emit(EVENTS.LOBBY_START);
+    }
+
+    /**
+     * Notify players of the start of the given lobby
+     *
+     * @param lobbyId Lobby's id
+     * @return {Promise<void>} Promise
+     */
+    async notifyLobbyEnd(lobbyId) {
+        await this.ws.to(lobbyId).emit(EVENTS.LOBBY_END);
+    }
 }
 
-export default WebsocketService;
+export { WebsocketService, EVENTS };
