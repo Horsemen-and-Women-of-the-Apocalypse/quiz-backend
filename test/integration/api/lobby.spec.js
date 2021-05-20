@@ -67,7 +67,7 @@ describe("LobbyAPI", () => {
 
         it("Return an error because of already started game", async () => {
             lobby.start();
-            await lobbyService.updateLobyStartDate(lobby);
+            await lobbyService.updatelobbyStartDate(lobby);
 
             const response = await chai.request(SERVER_URL).put(LOBBY_JOIN_ROUTE(lobbyId)).send({ playerName: "Bob" });
 
@@ -76,10 +76,10 @@ describe("LobbyAPI", () => {
 
         it("Return an error because of ended game", async () => {
             lobby.start();
-            await lobbyService.updateLobyStartDate(lobby);
+            await lobbyService.updatelobbyStartDate(lobby);
 
             lobby.end();
-            await lobbyService.updateLobyEndDate(lobby);
+            await lobbyService.updatelobbyEndDate(lobby);
 
             const response = await chai.request(SERVER_URL).put(LOBBY_JOIN_ROUTE(lobbyId)).send({ playerName: "Bob" });
 
@@ -237,8 +237,6 @@ describe("LobbyAPI", () => {
 
             chai.assert.equal(response.status, 500);
         });
-
-
         it("Send malformed creation request", async () => {
             const response1 = await chai.request(SERVER_URL).post(LOBBY_CREATE_ROUTE).send({ playerId: [] });
             chai.assert.equal(response1.status, 500);
@@ -246,8 +244,6 @@ describe("LobbyAPI", () => {
             const response2 = await chai.request(SERVER_URL).post(LOBBY_CREATE_ROUTE).send({ foo: "bar" });
             chai.assert.equal(response2.status, 500);
         });
-
-
         it("Successful lobby creation", async () => {
             // Test for player
             const response = await chai.request(SERVER_URL).post(LOBBY_CREATE_ROUTE).send(

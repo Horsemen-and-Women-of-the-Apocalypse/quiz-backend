@@ -103,25 +103,11 @@ const join = async (services, request, response, next) => {
  */
 const create = async (services, request, response, next) => {
     try {
-        // Check lobby id
-        const lobbyId = request.param("id");
-        if (typeof lobbyId !== "string") {
-            throw new Error("Lobby id is undefined");
-        }
-
         // Check body
         if (!(request.body instanceof Object)) {
             throw new Error(HTTP.BODY_UNDEFINED);
         }
 
-        // Try to join a lobby
-        const join = await services.lobbyService.joinLobby(lobbyId, request.body);
-
-        // Notify everyone
-        services.ws.broadcastLobby(lobbyId, request.body.playerName, false);
-
-        // Send join response
-        response.json(new Response(join));
         // Create a lobby
         const lobby = await services.lobbyService.create(request.body);
 
