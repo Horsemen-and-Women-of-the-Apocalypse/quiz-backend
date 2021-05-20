@@ -81,7 +81,7 @@ describe("LobbyDbService", () => {
 
         // Start lobby
         l1.start();
-        await lobbyDbService.updateLobbyStartDate(l1);
+        await lobbyDbService.updatelobbyStartDate(l1);
 
         assert.isNotNull(l1.startDate);
         assert.isNull(l1.endDate);
@@ -94,7 +94,7 @@ describe("LobbyDbService", () => {
 
         // End lobby
         l1.end();
-        await lobbyDbService.updateLobbyEndDate(l1);
+        await lobbyDbService.updatelobbyEndDate(l1);
 
         assert.isNotNull(l1.startDate);
         assert.isNotNull(l1.endDate);
@@ -136,7 +136,7 @@ describe("LobbyDbService", () => {
         // Add player lobby
         let p1 = new Player("momo");
         l1.addPlayer(p1);
-        await lobbyDbService.updateLobyPlayerAnswers(l1, p1, [ "toto", "tata" ]);
+        await lobbyDbService.updateLobbyPlayerAnswers(l1, p1, [ "toto", "tata" ]);
 
         // Find altered lobby
         let myLobby = await lobbyDbService.findById(l1.id);

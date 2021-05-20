@@ -1,6 +1,7 @@
 import { ObjectID } from "mongodb";
 import { StringMultipleChoiceQuestion } from "../../models/question";
 import { Quiz } from "../../models/quiz";
+import fs from "fs";
 
 /**
  * Convert to quiz in MongoDB format into a Quiz object
@@ -26,6 +27,25 @@ class QuizDatabaseService {
      */
     constructor(database) {
         this.database = database;
+    }
+
+    /**
+    * Init quizzes collection if not created yet
+    *  
+    */
+    async init() {
+    // parse JSON string to JSON object
+        let initQuizzes = JSON.parse(fs.readFileSync("./data/quizzes.json", "UTF-8"));
+    
+        // Create Quiz object from JSON object
+        let allQuizzes = initQuizzes.map(quiz => new Quiz(quiz.name, quiz.questions.map(ques => new StringMultipleChoiceQuestion(ques.question, ques.choices, ques.solutionIndex))));
+
+        // Add default quiz in database if quizzes' collection is empty or not created
+        if(this.database.isEmptyCollection(QuizDatabaseService.getCollection())){
+            for(let i=0 ; i < allQuizzes.length ; i++){
+                await this.addQuiz(allQuizzes[i]);
+            }       
+        }
     }
 
     /**

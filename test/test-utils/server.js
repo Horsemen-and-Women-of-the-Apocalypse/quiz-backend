@@ -14,6 +14,10 @@ const QUIZ_CREATE_ROUTE = "/quiz/create";
 // Lobby
 const LOBBY_INFORMATION_ROUTE = (id) => `/lobby/${id}/info`;
 const LOBBY_START_ROUTE = (id) => `/lobby/${id}/start`;
+const LOBBY_JOIN_ROUTE = (id) => `/lobby/${id}/join`;
+const LOBBY_POST_ANSWER_ROUTE = (lobbyId, playerId) => `/lobby/${lobbyId}/player/${playerId}/answer`;
+const LOBBY_QUESTIONS_ROUTE = (id) => `/lobby/${id}/questions`;
+const LOBBY_CREATE_ROUTE = "/lobby/create";
 
 export {
     SERVER_URL,
@@ -23,5 +27,9 @@ export {
     QUIZ_CREATE_ROUTE,
     QUIZ_ANSWER_ROUTE,
     LOBBY_INFORMATION_ROUTE,
-    LOBBY_START_ROUTE
+    LOBBY_START_ROUTE,
+    LOBBY_JOIN_ROUTE,
+    LOBBY_POST_ANSWER_ROUTE,
+    LOBBY_QUESTIONS_ROUTE,
+    LOBBY_CREATE_ROUTE
 };
