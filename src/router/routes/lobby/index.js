@@ -38,10 +38,6 @@ const info = async (services, request, response, next) => {
  * Callback on post /lobby/:lobby_id/player/:player_id/answer
  *
  * @param services Services
- * @param request Request
- * @param response Response
- * @param next Next function
- * @return {Promise<void>} Promise
  */
 const addAnswers = async (services, request, response, next) => {
     try {
@@ -65,7 +61,33 @@ const addAnswers = async (services, request, response, next) => {
     }
 };
 
+/**
+ * Callback on /lobby/create
+ *
+ * @param services Services container
+ * @param request Request
+ * @param response Response
+ * @param next Next function
+ * @return {Promise<void>} Promise
+ */
+const create = async (services, request, response, next) => {
+    try {
+        // Check body
+        if (!(request.body instanceof Object)) {
+            throw new Error(HTTP.BODY_UNDEFINED);
+        }
+
+        // Create a lobby
+        const lobby = await services.lobbyService.create(request.body);
+
+        response.json(new Response(services.lobbyService.lobbyToJSON(lobby)));
+    } catch (e) {
+        next(e);
+    }
+};
+
 export default {
-    "info": new Route(route => route + "/:id/info", "get", info),
-    "addAnswer": new Route(route => route + "/:lobby_id/player/:player_id/answer", "post", addAnswers)
+    "info": new Route(route => route + "/:id/info", "post", info),
+    "addAnswer": new Route(route => route + "/:lobby_id/player/:player_id/answer", "post", addAnswers),
+    "create": new Route(route => route + "/create", "post", create)
 };
