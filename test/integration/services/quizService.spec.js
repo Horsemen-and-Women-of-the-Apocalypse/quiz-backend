@@ -99,4 +99,20 @@ describe("QuizService", () => {
         await quizService.dropCollection();
     });
 
+    test("Assert if quizzes' collection is empty or not", async () => {
+        let quizService = new QuizService(database);
+        let quiz = createQuiz();
+
+        // Reset DataBase
+        await quizService.dropCollection();
+
+        assert.equal(await database.isEmptyCollection(QuizService.getCollection()),true);
+
+        await quizService.addQuiz(quiz);
+
+        assert.equal(await database.isEmptyCollection(QuizService.getCollection()),false);
+
+        await quizService.dropCollection();
+    });
+
 });

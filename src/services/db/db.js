@@ -47,7 +47,7 @@ class quizDB {
         let collections = await collectionsCursor.toArray();
         let collectionNames = collections.map(c =>c.name);
 
-        return collectionNames.indexOf(collection) >= 0;
+        return !(collectionNames.indexOf(collection) >= 0);
     }
 
     /**
