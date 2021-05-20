@@ -9,4 +9,7 @@ const VERSION_ROUTE = "/version";
 const QUIZ_ANSWER_ROUTE = (id) => "/quiz/" + id + "/answer";
 const QUIZ_LIST_ROUTE = "/quiz/list";
 
-export { SERVER_URL, VERSION_ROUTE, QUIZ_LIST_ROUTE, QUIZ_ANSWER_ROUTE };
+// Lobby
+const LOBBY_INFORMATION_ROUTE = (id) => `/lobby/${id}/info`;
+
+export { SERVER_URL, VERSION_ROUTE, QUIZ_LIST_ROUTE, QUIZ_ANSWER_ROUTE, LOBBY_INFORMATION_ROUTE };
