@@ -76,7 +76,7 @@ class LobbyService {
         lobby.setPlayerAnswers(player, answers);
 
         // update the database
-        await this.lobbyDbService.updateLobyPlayerAnswers(lobby, player, answers);
+        await this.lobbyDbService.updateLobbyPlayerAnswers(lobby, player, answers);
     }
 
 }
