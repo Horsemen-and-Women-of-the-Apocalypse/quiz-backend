@@ -19,7 +19,7 @@ describe("API", () => {
             });
             socket.close();
 
-            chai.assert.equal(response, AUTH.ACCESS_DENIED + " a playerId is requiered");
+            chai.assert.equal(response, AUTH.ACCESS_DENIED + " a playerId is required");
         });
         it("Connection with no PlayerId should throw an error", async () => {
             const socket = io(SERVER_URL, {
@@ -36,7 +36,7 @@ describe("API", () => {
             });
             socket.close();
 
-            chai.assert.equal(response, AUTH.ACCESS_DENIED + " a playerId is requiered");
+            chai.assert.equal(response, AUTH.ACCESS_DENIED + " a playerId is required");
         });
         it("Connection with no PlayerId should throw an error", async () => {
             const socket = io(SERVER_URL, {
@@ -53,7 +53,7 @@ describe("API", () => {
             });
             socket.close();
 
-            chai.assert.equal(response, AUTH.ACCESS_DENIED + " a lobbyId is requiered");
+            chai.assert.equal(response, AUTH.ACCESS_DENIED + " a lobbyId is required");
         });
         it("Connection with an non existing lobby", async () => {
             const socket = io(SERVER_URL, {

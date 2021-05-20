@@ -42,7 +42,9 @@ describe("LobbyDbService", () => {
         allLobby = await lobbyDbService.getAllLobby();
         assert.equal(allLobby.length, 1);
         assert.instanceOf(allLobby[0], Lobby);
-        assert.equal(l1._id, allLobby[0]._id);
+        delete l1.quiz._id;
+        delete allLobby[0].quiz._id;
+        assert.deepEqual(allLobby[0], l1);
 
 
         // Add more lobby
