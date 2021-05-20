@@ -24,7 +24,7 @@ const info = async (services, request, response, next) => {
             throw new Error(HTTP.BODY_UNDEFINED);
         }
 
-        // Retrieve lobby informations from service
+        // Retrieve lobby information from service
         const info = await services.lobbyService.getLobbyInfo(lobbyId, request.body);
 
         // Send lobby information
@@ -35,5 +35,5 @@ const info = async (services, request, response, next) => {
 };
 
 export default {
-    "info": new Route(route => route + "/:id/info", "post", info)
+    "info": new Route(route => route + "/:id/info", "get", info)
 };
