@@ -99,10 +99,10 @@ describe("LobbyAPI", () => {
             chai.assert.equal(response.status, 500);
         });
         it("Send malformed answers", async () => {
-            const response1 = await chai.request(SERVER_URL).post(LOBBY_POST_ANSWER_ROUTE(lobbyId)).send({ answers: "Hello" });
+            const response1 = await chai.request(SERVER_URL).post(LOBBY_POST_ANSWER_ROUTE(lobbyId, lobby.owner.id)).send({ answers: "Hello" });
             chai.assert.equal(response1.status, 500);
 
-            const response2 = await chai.request(SERVER_URL).post(LOBBY_POST_ANSWER_ROUTE(lobbyId)).send({ foo: "bar" });
+            const response2 = await chai.request(SERVER_URL).post(LOBBY_POST_ANSWER_ROUTE(lobbyId, lobby.owner.id)).send({ foo: "bar" });
             chai.assert.equal(response2.status, 500);
         });
         it("Return an error because of unknown lobby", async () => {
@@ -129,6 +129,13 @@ describe("LobbyAPI", () => {
 
             const response = await chai.request(SERVER_URL).post(LOBBY_POST_ANSWER_ROUTE(lobbyId, dbLobby._otherPlayers[0].id)).send({ answers: [ "a", "b", "c" ] });
             chai.assert.equal(response.status, 200);
+        });
+        it("A player can't add answers twice", async () => {
+            const dbLobby = await lobbyService.findById(lobbyId);
+
+            await chai.request(SERVER_URL).post(LOBBY_POST_ANSWER_ROUTE(lobbyId, dbLobby._otherPlayers[0].id)).send({ answers: [ "a", "b", "c" ] });
+            const response = await chai.request(SERVER_URL).post(LOBBY_POST_ANSWER_ROUTE(lobbyId, dbLobby._otherPlayers[0].id)).send({ answers: [ "a", "b", "c" ] });
+            chai.assert.equal(response.status, 500);
         });
 
     });

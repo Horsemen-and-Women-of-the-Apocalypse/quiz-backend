@@ -68,10 +68,6 @@ class LobbyService {
         const player = lobby.players.find(p => p.id === playerId);
         if (!(player instanceof Player)) throw new Error("No player with id: " + playerId + " found in the lobby");
 
-        // Check player affiliations to the lobby
-        const authorized = lobby.players.find(item => item.id === playerId);
-        if (!authorized) throw new Error("Unauthorized player");
-
         // update the lobby
         lobby.setPlayerAnswers(player, answers);
 
