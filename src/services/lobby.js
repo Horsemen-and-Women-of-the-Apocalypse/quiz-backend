@@ -131,7 +131,7 @@ class LobbyService {
 
         // Update lobby's start date
         lobby.start();
-        await this.lobbyDbService.updateLobbyStartDate(lobby);
+        await this.lobbyDbService.updatelobbyStartDate(lobby);
 
         // Notify players
         await this.wsService.notifyLobbyStart(lobby.id);
@@ -144,7 +144,7 @@ class LobbyService {
                     try {
                         // Update lobby's end date
                         lobby.end();
-                        await this.lobbyDbService.updateLobbyEndDate(lobby);
+                        await this.lobbyDbService.updatelobbyEndDate(lobby);
 
                         // Notify end
                         await this.wsService.notifyLobbyEnd(lobbyId);
