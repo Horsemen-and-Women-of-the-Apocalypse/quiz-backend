@@ -302,11 +302,11 @@ describe("LobbyAPI", () => {
         it("Return an error because lobby ended", async () => {
             // Start lobby
             lobby.start();
-            await lobbyService.updateLobyStartDate(lobby);
+            await lobbyService.updatelobbyStartDate(lobby);
 
             // End lobby
             lobby.end();
-            await lobbyService.updateLobyEndDate(lobby);
+            await lobbyService.updatelobbyEndDate(lobby);
 
             const response = await chai.request(SERVER_URL).get(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: lobby.players[0]._id });
 
@@ -316,7 +316,7 @@ describe("LobbyAPI", () => {
         it("Return all questions of a lobby already start", async () => {
             // Start lobby
             lobby.start();
-            await lobbyService.updateLobyStartDate(lobby);
+            await lobbyService.updatelobbyStartDate(lobby);
 
             const response = await chai.request(SERVER_URL).get(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: lobby.players[0]._id });
             const expectedQuestions = lobby.quiz.questions.map(item => {
@@ -333,7 +333,7 @@ describe("LobbyAPI", () => {
         it("Return an error because lobby is corrupted", async () => {
             // End lobby
             lobby.end();
-            await lobbyService.updateLobyEndDate(lobby);
+            await lobbyService.updatelobbyEndDate(lobby);
 
             const response = await chai.request(SERVER_URL).get(LOBBY_QUESTIONS_ROUTE(lobbyId)).send({ playerId: lobby.players[0]._id });
 
