@@ -13,7 +13,7 @@ const objToLobby = async (obj, quizService) => {
 
     if (!quiz) throw new Error("The quiz saved in the database hasn't been found");
 
-    let owner = new Player(obj.ownerName);
+    let owner = new Player(obj.owner.name, obj.owner.id);
 
     let players = obj.otherPlayers.map(p => new Player(p.name, p.id));
     let startDate = strDateTomoment(obj.startDate);
@@ -64,7 +64,7 @@ class LobbyDbService {
 
         let lobbyObjToAdd = {
             name: lobby.name,
-            ownerName: lobby.owner.name,
+            owner: { id: lobby.owner.id, name: lobby.owner.name },
             otherPlayers: lobby.getPlayersToObj(),
             quizId: lobby.quiz.id,
             startDate: lobby.startDate,
