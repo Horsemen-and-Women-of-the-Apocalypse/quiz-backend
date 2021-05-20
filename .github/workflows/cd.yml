@@ -1,0 +1,42 @@
+name: Master branch Continuous Deployment
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  docker-img-name: quiz_app_img
+  config: "[server] \nport=8086 \n[database] \nname=quiz \nurl=mongodb://164.132.98.183:27017"
+jobs:
+  build-web:
+    name: Build web and attach docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get project
+        uses: actions/checkout@v1
+
+      - name: Create file
+        run: echo -e ${{env.config}} > ./config/app.production.ini
+
+      - name: Get application version
+        id: package-version
+        uses: CumulusDS/get-yaml-paths-action@v0.1.0
+        with:
+          file: pubspec.yaml
+          version: version
+
+      - name: Build the Docker image
+        run: docker build . -t ${{env.docker-img-name}}
+
+      - name: Save the Docker image
+        run: docker save --output ${{env.docker-img-name}}.tar ${{env.docker-img-name}}
+
+      - name: Upload Docker image to release
+        uses: svenstaro/upload-release-action@v1-release
+        with:
+          repo_token: ${{secrets.GITHUB_TOKEN}}
+          file: ${{env.docker-img-name}}.tar
+          asset_name: ${{env.docker-img-name}}.tar
+          tag: ${{steps.package-version.outputs.version}}
+          overwrite: true
