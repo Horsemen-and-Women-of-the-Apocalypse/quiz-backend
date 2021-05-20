@@ -1,12 +1,12 @@
 import chai from "chai";
-import { before, describe, it } from "mocha";
+import { beforeEach, describe, it } from "mocha";
 import { ObjectID } from "mongodb";
 import { database } from "../../../src";
 import { StringMultipleChoiceQuestion } from "../../../src/models/question";
 import { Quiz } from "../../../src/models/quiz";
 import QuizDatabaseService from "../../../src/services/db/quiz";
 import { parseJSONResponse } from "../../test-utils/http";
-import { QUIZ_LIST_ROUTE, QUIZ_ANSWER_ROUTE, SERVER_URL } from "../../test-utils/server";
+import { QUIZ_ANSWER_ROUTE, QUIZ_CREATE_ROUTE, QUIZ_QUESTIONS_ROUTE, QUIZ_LIST_ROUTE, SERVER_URL } from "../../test-utils/server";
 
 const quiz = new Quiz("Test", [
     new StringMultipleChoiceQuestion("A", [ "A", "B", "C" ], 0),
@@ -15,10 +15,11 @@ const quiz = new Quiz("Test", [
 ]);
 
 describe("API", () => {
+    let service;
     let quizId;
 
-    before(async () => {
-        const service = new QuizDatabaseService(database);
+    beforeEach(async () => {
+        service = new QuizDatabaseService(database);
 
         // Reset quiz collection and add a quiz
         await service.dropCollection();
@@ -29,10 +30,81 @@ describe("API", () => {
         it("Should return all quizzes", async () => {
             const service = new QuizDatabaseService(database);
 
-            let response = await chai.request(SERVER_URL).get(QUIZ_LIST_ROUTE);
+            const response = await chai.request(SERVER_URL).get(QUIZ_LIST_ROUTE);
 
             chai.assert.equal(response.status, 200);
-            chai.assert.sameDeepMembers(parseJSONResponse(response).data, (await service.allQuizzes()).map((item) => { return { "id": item["_id"], "name": item["_name"] }; }));
+            chai.assert.sameDeepMembers(parseJSONResponse(response).data, (await service.allQuizzes()).map((item) => {
+                return { "id": item["_id"], "name": item["_name"] };
+            }));
+        });
+    });
+
+    describe("/quiz/create", () => {
+        it("Send undefined payload", async () => {
+            const response = await chai.request(SERVER_URL).post(QUIZ_CREATE_ROUTE).send();
+
+            chai.assert.equal(response.status, 500);
+        });
+
+        it("Send malformed payload", async () => {
+            const response = await chai.request(SERVER_URL).post(QUIZ_CREATE_ROUTE).send({ data: "DATA" });
+
+            chai.assert.equal(response.status, 500);
+        });
+
+        it("Create a quiz", async () => {
+            const quizCreationPayload = {
+                name: "My testing quiz",
+                questions: [
+                    {
+                        question: "First question",
+                        choices: [ "A", "B", "C" ],
+                        solutionIndex: 0
+                    },
+                    {
+                        question: "Second question",
+                        choices: [ "A", "B", "C" ],
+                        solutionIndex: 2
+                    }
+                ]
+            };
+
+            // Create a quiz
+            const response = await chai.request(SERVER_URL).post(QUIZ_CREATE_ROUTE).send(quizCreationPayload);
+
+            // Check response
+            chai.assert.equal(response.status, 200);
+            const json = parseJSONResponse(response).data;
+            chai.assert.typeOf(json, "string");
+
+            // Find quiz in database
+            const quiz = await service.findById(json);
+            chai.assert.isNotNull(quiz);
+
+            delete quiz._id;
+            chai.assert.deepEqual(quiz,
+                new Quiz(quizCreationPayload.name, quizCreationPayload.questions.map(q => new StringMultipleChoiceQuestion(q.question, q.choices, q.solutionIndex))));
+        });
+    });
+
+    describe("/quiz/:id/questions", () => {
+        it("Return an error because unknown quiz", async () => {
+            const response = await chai.request(SERVER_URL).get(QUIZ_QUESTIONS_ROUTE(new ObjectID().toString()));
+
+            chai.assert.equal(response.status, 500);
+        });
+
+        it("Return all questions", async () => {
+            const response = await chai.request(SERVER_URL).get(QUIZ_QUESTIONS_ROUTE(quizId));
+            const expectedQuestions = quiz.questions.map(item => {
+                return {
+                    "question": item.question,
+                    "choices": item.choices
+                };
+            });
+
+            chai.assert.equal(response.status, 200);
+            chai.assert.sameDeepMembers(parseJSONResponse(response).data, expectedQuestions);
         });
     });
 

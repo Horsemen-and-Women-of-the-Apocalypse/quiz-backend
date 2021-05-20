@@ -64,7 +64,11 @@ class LobbyDbService {
 
         let lobbyObjToAdd = {
             name: lobby.name,
+<<<<<<< HEAD
             owner: { id: lobby.owner.id, name: lobby.owner.name },
+=======
+            owner: { name: lobby.owner.name, id: lobby.owner.id },
+>>>>>>> remotes/origin/develop
             otherPlayers: lobby.getPlayersToObj(),
             quizId: lobby.quiz.id,
             startDate: lobby.startDate,

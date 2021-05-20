@@ -1,3 +1,4 @@
+import { StringMultipleChoiceQuestion } from "../models/question";
 import { Quiz } from "../models/quiz";
 
 /**
@@ -16,16 +17,65 @@ class QuizService {
 
     /**
      * Return all quizzes saved in the database
-     * 
+     *
      * @return {Promise<[{id: number, name: string}]>} Array of quizzes
      */
     async getAllQuizzes() {
-        return (await this.quizDbService.allQuizzes()).map((item) => { 
-            return { 
-                "id": item._id, 
-                "name": item._name 
-            }; 
+        return (await this.quizDbService.allQuizzes()).map((item) => {
+            return {
+                "id": item._id,
+                "name": item._name
+            };
         });
+    }
+
+    /**
+     * Create a quiz based on a creation request
+     *
+     * @param request Creation request
+     * @return {Promise<string>} Promise containing quiz's id
+     */
+    async create(request) {
+        // Check request
+        if (!Array.isArray(request.questions)) {
+            throw new Error("Malformed questions");
+        }
+
+        // Save quiz
+        return this.quizDbService.addQuiz(new Quiz(request.name, request.questions.map(q => new StringMultipleChoiceQuestion(q.question, q.choices, q.solutionIndex))));
+    }
+
+    /**
+     * Get questions of a given quiz
+     *
+     * @param quizId Quiz's id
+     * @return {Promise<[{question: string, choices: []}]>} Questions without solution
+     */
+    async getQuizQuestions(quizId) {
+        // Retrieve quiz
+        const quiz = await this.quizDbService.findById(quizId);
+        if (!(quiz instanceof Quiz)) {
+            throw new Error("No quiz found for id: " + quizId);
+        }
+
+        // Format questions and remove solution for each of them
+        const questions = quiz.questions.map(item => {
+            let q = {
+                "question": item._question
+            };
+
+            switch(item.constructor.name) {
+                case "StringMultipleChoiceQuestion":
+                    q.choices = item._choices;
+                    break;
+                default:
+                    throw new Error("Question type not yet implemented");
+            }
+
+            return q;
+        });
+
+        return questions;
     }
 
     /**
@@ -33,7 +83,7 @@ class QuizService {
      *
      * @param quizId Quiz's id
      * @param request User's answers request
-     * @return {Promise<{score: number, maxScore, fails: *[]}>} Results
+     * @return {Promise<{score: number, maxScore, fails: *[]}>} Promise containing results
      */
     async checkResults(quizId, request) {
         // Check answers

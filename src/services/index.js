@@ -79,13 +79,14 @@ class ServiceContainer {
  */
 const init = async (server, database) => {
     // Initialize services
-    const ws = new WebsocketService();
-    ws.init(server);
 
     const quizdbService = new QuizDatabaseService(database);
     const quizService = new QuizService(quizdbService);
     const lobbyDbService = new LobbyDbService(database, quizdbService);
     const lobbyService = new LobbyService(lobbyDbService);
+
+    const ws = new WebsocketService(lobbyDbService);
+    ws.init(server);
 
     return new ServiceContainer(ws, quizdbService, quizService, lobbyDbService, lobbyService);
 };
