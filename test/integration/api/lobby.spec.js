@@ -1,4 +1,4 @@
-import { before, beforeEach, describe, it } from "mocha";
+import { beforeEach, describe, it } from "mocha";
 import chai, { assert } from "chai";
 import { ObjectID } from "mongodb";
 import { database } from "../../../src";
@@ -8,24 +8,22 @@ import LobbyDbService from "../../../src/services/db/lobbyDbService";
 import io from "socket.io-client";
 import { createLobby } from "../../common/utils";
 import { parseJSONResponse } from "../../test-utils/http";
-import WebsocketService from "../../../src/services/ws";
-import { SERVER_URL, LOBBY_INFORMATION_ROUTE, LOBBY_JOIN_ROUTE, LOBBY_POST_ANSWER_ROUTE, LOBBY_CREATE_ROUTE, LOBBY_QUESTIONS_ROUTE } from "../../test-utils/server";
+import { EVENTS, WebsocketService } from "../../../src/services/ws";
+import { SERVER_URL, LOBBY_INFORMATION_ROUTE, LOBBY_START_ROUTE, LOBBY_JOIN_ROUTE, LOBBY_POST_ANSWER_ROUTE, LOBBY_CREATE_ROUTE, LOBBY_QUESTIONS_ROUTE } from "../../test-utils/server";
 import { Lobby } from "../../../src/models/lobby";
 
-let lobby;
-let quizService;
-let lobbyService;
-
 describe("LobbyAPI", () => {
+    let quizService;
+    let lobbyService;
+
+    let lobby;
     let lobbyId;
     let quizId;
 
-    before(() => {
+    beforeEach(async () => {
         quizService = new QuizService(database);
         lobbyService = new LobbyDbService(database, quizService);
-    });
 
-    beforeEach(async () => {
         // Reset collections
         await lobbyService.dropCollection();
         await quizService.dropCollection();
@@ -157,7 +155,9 @@ describe("LobbyAPI", () => {
             chai.assert.equal(json.name, lobby.name);
             chai.assert.equal(json.quizName, lobby.quiz.name);
             chai.assert.equal(json.ownerName, lobby.owner.name);
-            chai.assert.sameMembers(json.playerNames, lobby.players.map(item => { return item.name; }));
+            chai.assert.sameMembers(json.playerNames, lobby.players.map(item => {
+                return item.name;
+            }));
         });
 
         it("Retrieve lobby information for the owner", async () => {
@@ -174,7 +174,93 @@ describe("LobbyAPI", () => {
             chai.assert.equal(json.name, lobby.name);
             chai.assert.equal(json.quizName, lobby.quiz.name);
             chai.assert.equal(json.ownerName, lobby.owner.name);
-            chai.assert.sameMembers(json.playerNames, lobby.players.map(item => { return item.name; }));
+            chai.assert.sameMembers(json.playerNames, lobby.players.map(item => {
+                return item.name;
+            }));
+        });
+    });
+
+    describe("/lobby/:id/start", () => {
+        it("Send undefined payload", async () => {
+            const response = await chai.request(SERVER_URL).post(LOBBY_START_ROUTE(lobbyId)).send();
+
+            chai.assert.equal(response.status, 500);
+        });
+
+        it("Send malformed payload", async () => {
+            const response = await chai.request(SERVER_URL).post(LOBBY_START_ROUTE(lobbyId)).send({ playerId: [] });
+
+            chai.assert.equal(response.status, 500);
+        });
+
+        it("Start an unknown lobby", async () => {
+            const response = await chai.request(SERVER_URL).post(LOBBY_START_ROUTE(new ObjectID())).send({ playerId: "id" });
+
+            chai.assert.equal(response.status, 500);
+        });
+
+        it("Start lobby with an unknown player", async () => {
+            const response = await chai.request(SERVER_URL).post(LOBBY_START_ROUTE(lobbyId)).send({ playerId: "id" });
+
+            chai.assert.equal(response.status, 500);
+        });
+
+        it("Start lobby with owner", async () => {
+            let ownerStartEvent = null;
+            let playerStartEvent = null;
+
+            // Connect owner and a player to socket
+            const ownerClient = io(SERVER_URL, {
+                path: WebsocketService.RELATIVE_PATH, query: {
+                    lobbyId: lobbyId,
+                    playerId: lobby.owner.id,
+                }
+            });
+            ownerClient.on(EVENTS.LOBBY_START, () => ownerStartEvent = "OK");
+            const ownerEndPromise = new Promise((resolve => ownerClient.on(EVENTS.LOBBY_END, resolve)));
+            const playerClient = io(SERVER_URL, {
+                path: WebsocketService.RELATIVE_PATH, query: {
+                    lobbyId: lobbyId,
+                    playerId: lobby.players[lobby.players.length - 1].id,
+                }
+            });
+            playerClient.on(EVENTS.LOBBY_START, () => playerStartEvent = "OK");
+            const playerEndPromise = new Promise(resolve => playerClient.on(EVENTS.LOBBY_END, resolve));
+
+            // Start lobby
+            const response = await chai.request(SERVER_URL).post(LOBBY_START_ROUTE(lobbyId)).send({ playerId: lobby.owner.id });
+            chai.assert.equal(response.status, 200);
+
+            // Wait lobby end
+            await Promise.all([ ownerEndPromise, playerEndPromise ]);
+            ownerClient.close();
+            playerClient.close();
+
+            chai.assert.equal(ownerStartEvent, "OK");
+            chai.assert.equal(playerStartEvent, "OK");
+        });
+
+        it("Start lobby which is already started", async () => {
+            // Connect owner to socket
+            const ownerClient = io(SERVER_URL, {
+                path: WebsocketService.RELATIVE_PATH, query: {
+                    lobbyId: lobbyId,
+                    playerId: lobby.owner.id,
+                }
+            });
+            const ownerEndPromise = new Promise((resolve => ownerClient.on(EVENTS.LOBBY_END, resolve)));
+
+            // Start lobby
+            let response = await chai.request(SERVER_URL).post(LOBBY_START_ROUTE(lobbyId)).send({ playerId: lobby.owner.id });
+            chai.assert.equal(response.status, 200);
+
+            // Start lobby
+            response = await chai.request(SERVER_URL).post(LOBBY_START_ROUTE(lobbyId)).send({ playerId: lobby.owner.id });
+            chai.assert.equal(response.status, 500);
+
+            // Wait lobby end
+            await ownerEndPromise;
+            ownerClient.close();
         });
     });
     describe("/lobby/:lobby_id/player/:player_id/answer", () => {
