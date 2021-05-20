@@ -41,7 +41,7 @@ class LobbyService {
             throw new Error("Unauthorized player");
         }
 
-        // Return informations
+        // Return information
         return {
             id: lobby.id,
             name: lobby.name,
