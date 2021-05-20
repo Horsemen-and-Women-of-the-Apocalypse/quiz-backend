@@ -34,6 +34,32 @@ const info = async (services, request, response, next) => {
     }
 };
 
+/**
+ * Callback on /lobby/create
+ *
+ * @param services Services container
+ * @param request Request
+ * @param response Response
+ * @param next Next function
+ * @return {Promise<void>} Promise
+ */
+const create = async (services, request, response, next) => {
+    try {
+        // Check body
+        if (!(request.body instanceof Object)) {
+            throw new Error(HTTP.BODY_UNDEFINED);
+        }
+
+        // Create a lobby
+        const lobby = await services.lobbyService.create(request.body);
+
+        response.json(new Response(services.lobbyService.lobbyToJSON(lobby)));
+    } catch (e) {
+        next(e);
+    }
+};
+
 export default {
-    "info": new Route(route => route + "/:id/info", "post", info)
+    "info": new Route(route => route + "/:id/info", "post", info),
+    "create": new Route(route => route + "/create", "post", create)
 };
