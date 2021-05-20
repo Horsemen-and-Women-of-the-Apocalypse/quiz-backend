@@ -18,7 +18,7 @@ describe("LobbyAPI", () => {
     before(async () => {
         quizService = new QuizService(database);
         lobbyService = new LobbyDbService(database, quizService);
-        
+
         // Reset collections
         await lobbyService.dropCollection();
         await quizService.dropCollection();
@@ -30,27 +30,27 @@ describe("LobbyAPI", () => {
 
     describe("/lobby/:id/info", () => {
         it("Send undefined payload", async () => {
-            const response = await chai.request(SERVER_URL).get(LOBBY_INFORMATION_ROUTE(lobbyId)).send();
+            const response = await chai.request(SERVER_URL).post(LOBBY_INFORMATION_ROUTE(lobbyId)).send();
 
             chai.assert.equal(response.status, 500);
         });
 
         it("Send malformed answers", async () => {
-            const response1 = await chai.request(SERVER_URL).get(LOBBY_INFORMATION_ROUTE(lobbyId)).send({ playerId: [] });
+            const response1 = await chai.request(SERVER_URL).post(LOBBY_INFORMATION_ROUTE(lobbyId)).send({ playerId: [] });
             chai.assert.equal(response1.status, 500);
-            
-            const response2 = await chai.request(SERVER_URL).get(LOBBY_INFORMATION_ROUTE(lobbyId)).send({ foo: "bar" });
+
+            const response2 = await chai.request(SERVER_URL).post(LOBBY_INFORMATION_ROUTE(lobbyId)).send({ foo: "bar" });
             chai.assert.equal(response2.status, 500);
         });
 
         it("Return an error because of unknown lobby", async () => {
-            const response = await chai.request(SERVER_URL).get(LOBBY_INFORMATION_ROUTE(new ObjectID().toString())).send({ playerId: "some_id" });
+            const response = await chai.request(SERVER_URL).post(LOBBY_INFORMATION_ROUTE(new ObjectID().toString())).send({ playerId: "some_id" });
 
             chai.assert.equal(response.status, 500);
         });
 
         it("Return an error because of unauthorized user", async () => {
-            const response = await chai.request(SERVER_URL).get(LOBBY_INFORMATION_ROUTE(lobbyId)).send({ playerId: "unauthorized" });
+            const response = await chai.request(SERVER_URL).post(LOBBY_INFORMATION_ROUTE(lobbyId)).send({ playerId: "unauthorized" });
 
             chai.assert.equal(response.status, 500);
         });
@@ -63,7 +63,7 @@ describe("LobbyAPI", () => {
 
             // Test for player
             const playerId = players.find(item => item.id !== owner.id).id;
-            const response = await chai.request(SERVER_URL).get(LOBBY_INFORMATION_ROUTE(lobbyId)).send({ playerId: playerId });
+            const response = await chai.request(SERVER_URL).post(LOBBY_INFORMATION_ROUTE(lobbyId)).send({ playerId: playerId });
 
             chai.assert.equal(response.status, 200);
 
@@ -78,10 +78,10 @@ describe("LobbyAPI", () => {
         it("Retrieve lobby informations for the owner", async () => {
             const dbLobby = await lobbyService.findById(lobbyId);
             const owner = dbLobby.owner;
-            
+
             // Test for owner
-            const response = await chai.request(SERVER_URL).get(LOBBY_INFORMATION_ROUTE(lobbyId)).send({ playerId: owner.id });
-            
+            const response = await chai.request(SERVER_URL).post(LOBBY_INFORMATION_ROUTE(lobbyId)).send({ playerId: owner.id });
+
             chai.assert.equal(response.status, 200);
 
             const json = parseJSONResponse(response).data;
