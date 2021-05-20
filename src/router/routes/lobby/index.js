@@ -35,6 +35,33 @@ const info = async (services, request, response, next) => {
 };
 
 /**
+ * Callback on post /lobby/:lobby_id/player/:player_id/answer
+ *
+ * @param services Services
+ */
+const addAnswers = async (services, request, response, next) => {
+    try {
+        // Check lobby id
+        const lobbyId = request.param("lobby_id");
+        if (typeof lobbyId !== "string") throw new Error("Lobby id is undefined");
+
+        // Check player id
+        const playerId = request.param("player_id");
+        if (typeof playerId !== "string") throw new Error("player id is undefined");
+
+        // Check body
+        if (!(request.body instanceof Object)) throw new Error(HTTP.BODY_UNDEFINED);
+        if (!("answers" in request.body)) throw new Error("the 'answers' array is required in the payload");
+
+        await services.lobbyService.addAnswers(lobbyId, playerId, request.body.answers);
+
+        response.json(Response.OK);
+    } catch (e) {
+        next(e);
+    }
+};
+
+/**
  * Callback on /lobby/create
  *
  * @param services Services container
@@ -61,5 +88,6 @@ const create = async (services, request, response, next) => {
 
 export default {
     "info": new Route(route => route + "/:id/info", "post", info),
+    "addAnswer": new Route(route => route + "/:lobby_id/player/:player_id/answer", "post", addAnswers),
     "create": new Route(route => route + "/create", "post", create)
 };

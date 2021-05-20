@@ -1,4 +1,4 @@
-import chai from "chai";
+import chai, { assert } from "chai";
 import { before, describe, it } from "mocha";
 import { ObjectID } from "mongodb";
 import { database } from "../../../src";
@@ -6,7 +6,7 @@ import QuizService from "../../../src/services/db/quiz";
 import LobbyDbService from "../../../src/services/db/lobbyDbService";
 import { createLobby } from "../../common/utils";
 import { parseJSONResponse } from "../../test-utils/http";
-import { SERVER_URL, LOBBY_INFORMATION_ROUTE, LOBBY_CREATE_ROUTE } from "../../test-utils/server";
+import { SERVER_URL, LOBBY_INFORMATION_ROUTE, LOBBY_POST_ANSWER_ROUTE, LOBBY_CREATE_ROUTE } from "../../test-utils/server";
 import { Lobby } from "../../../src/models/lobby";
 
 const lobby = createLobby();
@@ -94,6 +94,52 @@ describe("LobbyAPI", () => {
             chai.assert.sameMembers(json.playerNames, lobby.players.map(item => { return item.name; }));
         });
     });
+    describe("/lobby/:lobby_id/player/:player_id/answer", () => {
+        it("Send undefined payload", async () => {
+            const response = await chai.request(SERVER_URL).post(LOBBY_POST_ANSWER_ROUTE(lobbyId, lobby.owner.id)).send();
+
+            chai.assert.equal(response.status, 500);
+        });
+        it("Send malformed answers", async () => {
+            const response1 = await chai.request(SERVER_URL).post(LOBBY_POST_ANSWER_ROUTE(lobbyId, lobby.owner.id)).send({ answers: "Hello" });
+            chai.assert.equal(response1.status, 500);
+
+            const response2 = await chai.request(SERVER_URL).post(LOBBY_POST_ANSWER_ROUTE(lobbyId, lobby.owner.id)).send({ foo: "bar" });
+            chai.assert.equal(response2.status, 500);
+        });
+        it("Return an error because of unknown lobby", async () => {
+            const response = await chai.request(SERVER_URL).post(LOBBY_POST_ANSWER_ROUTE(new ObjectID().toString(), new ObjectID().toString())).send({ answers: [] });
+            chai.assert.equal(response.status, 500);
+        });
+        it("Return an error because of unauthorized user", async () => {
+            const response = await chai.request(SERVER_URL).post(LOBBY_POST_ANSWER_ROUTE(lobbyId, new ObjectID().toString())).send({ answers: [] });
+            chai.assert.equal(response.status, 500);
+        });
+        it("Add answers for the owner", async () => {
+            const dbLobby = await lobbyService.findById(lobbyId);
+
+            const response = await chai.request(SERVER_URL).post(LOBBY_POST_ANSWER_ROUTE(lobbyId, dbLobby.owner.id)).send({ answers: [ "a", "b", "c" ] });
+            chai.assert.equal(response.status, 200);
+
+            const dbLobby2 = await lobbyService.findById(lobbyId);
+            assert.isTrue(dbLobby.owner.id in dbLobby2.answersByPlayerId);
+            assert.deepEqual(dbLobby2.answersByPlayerId[dbLobby.owner.id], [ "a", "b", "c" ]);
+
+        });
+        it("Add answers for a player", async () => {
+            const dbLobby = await lobbyService.findById(lobbyId);
+
+            const response = await chai.request(SERVER_URL).post(LOBBY_POST_ANSWER_ROUTE(lobbyId, dbLobby._otherPlayers[0].id)).send({ answers: [ "a", "b", "c" ] });
+            chai.assert.equal(response.status, 200);
+        });
+        it("A player can't add answers twice", async () => {
+            const dbLobby = await lobbyService.findById(lobbyId);
+
+            await chai.request(SERVER_URL).post(LOBBY_POST_ANSWER_ROUTE(lobbyId, dbLobby._otherPlayers[0].id)).send({ answers: [ "a", "b", "c" ] });
+            const response = await chai.request(SERVER_URL).post(LOBBY_POST_ANSWER_ROUTE(lobbyId, dbLobby._otherPlayers[0].id)).send({ answers: [ "a", "b", "c" ] });
+            chai.assert.equal(response.status, 500);
+        });
+    });
 
     describe("/lobby/create", () => {
         it("Send undefined payload", async () => {
@@ -115,7 +161,8 @@ describe("LobbyAPI", () => {
         it("Successful lobby creation", async () => {
             // Test for player
             const response = await chai.request(SERVER_URL).post(LOBBY_CREATE_ROUTE).send(
-                {  name: "stahp",
+                {
+                    name: "stahp",
                     quizId: quizId,
                     ownerName: "josef"
                 });
