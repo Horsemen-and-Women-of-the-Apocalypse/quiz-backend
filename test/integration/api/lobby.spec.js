@@ -39,28 +39,21 @@ describe("LobbyAPI", () => {
 
     describe("/lobby/:id/join", () => {
         it("Send undefined payload", async () => {
-            const response = await chai.request(SERVER_URL).put(LOBBY_JOIN_ROUTE(lobbyId)).send();
+            const response = await chai.request(SERVER_URL).post(LOBBY_JOIN_ROUTE(lobbyId)).send();
 
             chai.assert.equal(response.status, 500);
         });
 
         it("Send malformed identifier", async () => {
-            const response1 = await chai.request(SERVER_URL).put(LOBBY_JOIN_ROUTE(lobbyId)).send({ playerName: [] });
+            const response1 = await chai.request(SERVER_URL).post(LOBBY_JOIN_ROUTE(lobbyId)).send({ playerName: [] });
             chai.assert.equal(response1.status, 500);
 
-            const response2 = await chai.request(SERVER_URL).put(LOBBY_JOIN_ROUTE(lobbyId)).send({ foo: "bar" });
+            const response2 = await chai.request(SERVER_URL).post(LOBBY_JOIN_ROUTE(lobbyId)).send({ foo: "bar" });
             chai.assert.equal(response2.status, 500);
         });
 
         it("Return an error because of unknown lobby", async () => {
-            const response = await chai.request(SERVER_URL).put(LOBBY_JOIN_ROUTE(new ObjectID().toString())).send({ playerName: "Bob" });
-
-            chai.assert.equal(response.status, 500);
-        });
-
-        it("Return an error because of player name already used in the lobby", async () => {
-            const lobbyPlayerName = lobby.players[0].name;
-            const response = await chai.request(SERVER_URL).put(LOBBY_JOIN_ROUTE(lobbyId)).send({ playerName: lobbyPlayerName });
+            const response = await chai.request(SERVER_URL).post(LOBBY_JOIN_ROUTE(new ObjectID().toString())).send({ playerName: "Bob" });
 
             chai.assert.equal(response.status, 500);
         });
@@ -69,7 +62,7 @@ describe("LobbyAPI", () => {
             lobby.start();
             await lobbyService.updatelobbyStartDate(lobby);
 
-            const response = await chai.request(SERVER_URL).put(LOBBY_JOIN_ROUTE(lobbyId)).send({ playerName: "Bob" });
+            const response = await chai.request(SERVER_URL).post(LOBBY_JOIN_ROUTE(lobbyId)).send({ playerName: "Bob" });
 
             chai.assert.equal(response.status, 500);
         });
@@ -81,7 +74,7 @@ describe("LobbyAPI", () => {
             lobby.end();
             await lobbyService.updatelobbyEndDate(lobby);
 
-            const response = await chai.request(SERVER_URL).put(LOBBY_JOIN_ROUTE(lobbyId)).send({ playerName: "Bob" });
+            const response = await chai.request(SERVER_URL).post(LOBBY_JOIN_ROUTE(lobbyId)).send({ playerName: "Bob" });
 
             chai.assert.equal(response.status, 500);
         });
@@ -102,12 +95,12 @@ describe("LobbyAPI", () => {
 
             const socketResponse = await new Promise(async (resolve) => {
                 // Check lobby notification
-                socket.on("notify lobby", (arg) => {
+                socket.on("playerHasJoined", (arg) => {
                     chai.assert.equal(arg, playerName);
                     resolve(true);
                 });
                 socket.on("error", resolve);
-                const response = await chai.request(SERVER_URL).put(LOBBY_JOIN_ROUTE(lobbyId)).send({ playerName: playerName });
+                const response = await chai.request(SERVER_URL).post(LOBBY_JOIN_ROUTE(lobbyId)).send({ playerName: playerName });
 
                 chai.assert.equal(response.status, 200);
                 const dbLobby = await lobbyService.findById(lobbyId);

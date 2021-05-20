@@ -18,7 +18,7 @@ class LobbyService {
 
     /**
      * Join an available lobby
-     * 
+     *
      * @param lobbyId Lobby id
      * @param request Player name
      * @return {Promise<{playerId: number}} Newly added player id
@@ -46,19 +46,13 @@ class LobbyService {
             }
         }
 
-        // Check player existence (by name)
-        const usedName = lobby.players.find(item => item.name === playerName);
-        if (usedName) {
-            throw new Error("Name already used");
-        }
-
         // Add player to lobby
         const player = new Player(playerName);
         lobby.addPlayer(player);
         await this.lobbyDbService.addPlayersToLobby(lobby, player);
 
         // Return generated player id
-        return { playerId: player.id }; 
+        return { playerId: player.id };
     }
 
     /**

@@ -83,7 +83,7 @@ const join = async (services, request, response, next) => {
         const join = await services.lobbyService.joinLobby(lobbyId, request.body);
 
         // Notify everyone
-        services.ws.broadcastLobby(lobbyId, request.body.playerName, false);
+        services.ws.notifyPlayerJoin(lobbyId, request.body.playerName);
 
         // Send join response
         response.json(new Response(join));
@@ -119,7 +119,7 @@ const create = async (services, request, response, next) => {
 
 export default {
     "info": new Route(route => route + "/:id/info", "post", info),
-    "join": new Route(route => route + "/:id/join", "put", join),
+    "join": new Route(route => route + "/:id/join", "post", join),
     "addAnswer": new Route(route => route + "/:lobby_id/player/:player_id/answer", "post", addAnswers),
     "create": new Route(route => route + "/create", "post", create)
 };
