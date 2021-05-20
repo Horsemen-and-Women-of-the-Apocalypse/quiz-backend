@@ -9,7 +9,6 @@ import io from "socket.io-client";
 import { createLobby } from "../../common/utils";
 import { parseJSONResponse } from "../../test-utils/http";
 import { SERVER_URL, LOBBY_INFORMATION_ROUTE, LOBBY_JOIN_ROUTE } from "../../test-utils/server";
-import { BCAST } from "../../../src/common/notifications";
 import WebsocketService from "../../../src/services/ws";
 
 let lobby;
@@ -100,7 +99,7 @@ describe("LobbyAPI", () => {
             const socketResponse = await new Promise(async (resolve) => {
                 // Check lobby notification
                 socket.on("notify lobby", (arg) => {
-                    chai.assert.equal(arg, BCAST.LOBBY_NEW_PLAYER(playerName));
+                    chai.assert.equal(arg, playerName);
                     resolve(true);
                 });
                 socket.on("error", resolve);

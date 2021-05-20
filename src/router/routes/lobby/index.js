@@ -1,8 +1,6 @@
 import { HTTP } from "../../../common/apierrors";
 import { Route } from "../../route";
 import { Response } from "../../router";
-import { BCAST } from "../../../common/notifications";
-
 /**
  * Callback on /lobby/:id/info
  * 
@@ -61,7 +59,7 @@ const join = async (services, request, response, next) => {
         const join = await services.lobbyService.joinLobby(lobbyId, request.body);
 
         // Notify everyone
-        services.ws.broadcastLobby(lobbyId, BCAST.LOBBY_NEW_PLAYER(request.body.playerName), false);
+        services.ws.broadcastLobby(lobbyId, request.body.playerName, false);
 
         // Send join response
         response.json(new Response(join));
