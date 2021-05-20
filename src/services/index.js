@@ -81,13 +81,13 @@ const init = async (server, database) => {
     // Initialize services
 
     const quizdbService = new QuizDatabaseService(database);
+    await quizdbService.init();
     const quizService = new QuizService(quizdbService);
     const lobbyDbService = new LobbyDbService(database, quizdbService);
+    const lobbyService = new LobbyService(lobbyDbService, quizdbService);
 
     const ws = new WebsocketService(lobbyDbService);
     ws.init(server);
-
-    const lobbyService = new LobbyService(lobbyDbService, ws);
 
     return new ServiceContainer(ws, quizdbService, quizService, lobbyDbService, lobbyService);
 };
