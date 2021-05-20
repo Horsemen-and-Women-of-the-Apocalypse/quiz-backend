@@ -6,7 +6,7 @@ on:
       - master
 
 env:
-  docker-img-name: quiz_app_img
+  docker-img-name: quiz_app_backend_img
   config: "[server] \nport=8086 \n[database] \nname=quiz \nurl=mongodb://164.132.98.183:27017"
 jobs:
   build-web:
@@ -21,10 +21,7 @@ jobs:
 
       - name: Get application version
         id: package-version
-        uses: CumulusDS/get-yaml-paths-action@v0.1.0
-        with:
-          file: pubspec.yaml
-          version: version
+        uses: martinbeentjes/npm-get-version-action@master
 
       - name: Build the Docker image
         run: docker build . -t ${{env.docker-img-name}}
@@ -38,5 +35,5 @@ jobs:
           repo_token: ${{secrets.GITHUB_TOKEN}}
           file: ${{env.docker-img-name}}.tar
           asset_name: ${{env.docker-img-name}}.tar
-          tag: ${{steps.package-version.outputs.version}}
+          tag: ${{steps.package-version.outputs.current-version}}
           overwrite: true
