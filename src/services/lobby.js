@@ -1,4 +1,5 @@
 import { Lobby } from "../models/lobby";
+import { Player } from "../models/player";
 
 /**
  * Service interacting with lobby objects
@@ -10,8 +11,9 @@ class LobbyService {
      *
      * @param lobbyDbService Lobby database service
      */
-    constructor(lobbyDbService) {
+    constructor(lobbyDbService, quizDbService) {
         this.lobbyDbService = lobbyDbService;
+        this.quizDbService = quizDbService;
     }
 
     /**
@@ -51,6 +53,47 @@ class LobbyService {
         };
     }
 
+    /**
+     * Create a lobby based on a creation request
+     *
+     * @param request Creation request
+     * @return {Promise<Lobby>} Promise containing lobby's id
+     */
+    async create(request) {
+        if(!(request instanceof Object)) throw new Error("Unexpected request type");
+
+        //Find quiz
+        const quiz = await this.quizDbService.findById(request.quizId);
+        if (quiz === null) throw new Error("Quiz not found");
+
+        //Lobby insertion
+        const newLobby = new Lobby(request.name, quiz, new Player(request.ownerName), []);
+        await this.lobbyDbService.addLobby(newLobby);
+        return newLobby;
+    }
+
+    /**
+     * Translate lobby to JSON equivalent
+     *
+     * @param lobby Lobby
+     * @return {Object} Json equivalent
+     */
+    lobbyToJSON(lobby) {
+        if(!(lobby instanceof Lobby)) throw new Error("Unexpected lobby type");
+
+        return {
+            id: lobby.id,
+            name: lobby.name,
+            owner: {
+                id: lobby.owner.id,
+                name: lobby.owner.name
+            },
+            quiz: {
+                id: lobby.quiz.id,
+                name: lobby.quiz.name
+            }
+        };
+    }
 }
 
 export default LobbyService;
