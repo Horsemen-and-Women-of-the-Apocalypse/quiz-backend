@@ -181,11 +181,6 @@ const results = async (services, request, response, next) => {
             throw new Error("Lobby's id is undefined");
         }
 
-        // Check body of request
-        if (!(request.body instanceof Object)) {
-            throw new Error(HTTP.BODY_UNDEFINED);
-        }
-
         // Get all questions from lobby's quiz
         const results = await services.lobbyService.getLobbyResults(lobbyId);
 

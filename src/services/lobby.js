@@ -1,6 +1,7 @@
 import { Lobby } from "../models/lobby";
 import { Player } from "../models/player";
 import moment from "moment";
+import Semaphore from "semaphore";
 
 /**
  * Service interacting with lobby objects
@@ -18,6 +19,8 @@ class LobbyService {
         this.lobbyDbService = lobbyDbService;
         this.quizDbService = quizDbService;
         this.quizService = quizService;
+
+        this.answerSemaphore = Semaphore(1);
     }
 
     /**
@@ -104,19 +107,30 @@ class LobbyService {
      * @param {array} answers
      */
     async addAnswers(lobbyId, playerId, answers) {
-        // Retrieve lobby
-        const lobby = await this.lobbyDbService.findById(lobbyId);
-        if (!(lobby instanceof Lobby)) throw new Error("No lobby found for id: " + lobbyId);
+        return new Promise(async (resolve, reject) => {
+            this.answerSemaphore.take(async () => {
+                try {
+                    // Retrieve lobby
+                    const lobby = await this.lobbyDbService.findById(lobbyId);
+                    if (!(lobby instanceof Lobby)) throw new Error("No lobby found for id: " + lobbyId);
 
-        // Retrieve lobby player
-        const player = lobby.players.find(p => p.id === playerId);
-        if (!(player instanceof Player)) throw new Error("No player with id: " + playerId + " found in the lobby");
+                    // Retrieve lobby player
+                    const player = lobby.players.find(p => p.id === playerId);
+                    if (!(player instanceof Player)) throw new Error("No player with id: " + playerId + " found in the lobby");
 
-        // update the lobby
-        lobby.setPlayerAnswers(player, answers);
+                    // update the lobby
+                    lobby.setPlayerAnswers(player, answers);
 
-        // update the database
-        await this.lobbyDbService.updateLobbyPlayerAnswers(lobby);
+                    // update the database
+                    await this.lobbyDbService.updateLobbyPlayerAnswers(lobby);
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                } finally {
+                    this.answerSemaphore.leave();
+                }
+            });
+        });
     }
 
     /**
