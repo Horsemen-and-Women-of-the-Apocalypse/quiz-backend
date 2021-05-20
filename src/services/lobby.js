@@ -1,4 +1,5 @@
 import { Lobby } from "../models/lobby";
+import { Player } from "../models/player";
 
 /**
  * Service interacting with lobby objects
@@ -58,14 +59,14 @@ class LobbyService {
      * @param {string} playerId
      * @param {array} answers
      */
-    async addAnswer(lobbyId, playerId, answers) {
+    async addAnswers(lobbyId, playerId, answers) {
         // Retrieve lobby
         const lobby = await this.lobbyDbService.findById(lobbyId);
-        if (!(lobby instanceof "Lobby")) throw new Error("No lobby found for id: " + lobbyId);
+        if (!(lobby instanceof Lobby)) throw new Error("No lobby found for id: " + lobbyId);
 
         // Retrieve lobby player
         const player = lobby.players.find(p => p.id === playerId);
-        if (!(player instanceof "Player")) throw new Error("No player with id: " + playerId + " found in the lobby");
+        if (!(player instanceof Player)) throw new Error("No player with id: " + playerId + " found in the lobby");
 
         // Check player affiliations to the lobby
         const authorized = lobby.players.find(item => item.id === playerId);

@@ -13,6 +13,6 @@ const QUIZ_CREATE_ROUTE = "/quiz/create";
 
 // Lobby
 const LOBBY_INFORMATION_ROUTE = (id) => `/lobby/${id}/info`;
-const LOBBY_POST_ANSWER_ROUTE = (lobbyId, playerId) => `/lobby/${lobbyId}/player/${playerId}`;
+const LOBBY_POST_ANSWER_ROUTE = (lobbyId, playerId) => `/lobby/${lobbyId}/player/${playerId}/answer`;
 
 export { SERVER_URL, VERSION_ROUTE, QUIZ_QUESTIONS_ROUTE, QUIZ_LIST_ROUTE, QUIZ_CREATE_ROUTE, QUIZ_ANSWER_ROUTE, LOBBY_INFORMATION_ROUTE, LOBBY_POST_ANSWER_ROUTE };

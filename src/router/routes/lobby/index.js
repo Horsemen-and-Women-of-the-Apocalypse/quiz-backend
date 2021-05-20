@@ -59,7 +59,7 @@ const addAnswers = async (services, request, response, next) => {
 
         await services.lobbyService.addAnswers(lobbyId, playerId, request.body.answers);
 
-        response.ok();
+        response.json(Response.OK);
     } catch (e) {
         next(e);
     }
