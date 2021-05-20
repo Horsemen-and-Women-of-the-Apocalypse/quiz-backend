@@ -25,7 +25,7 @@ class WebsocketService {
         this.ws.use((socket, next) => { this.middleware(socket, next); });
 
         // Define connection callback
-        this.ws.on("connection", this.onConnection);
+        this.ws.on("connection", (client) => { this.onConnection(client); });
     }
 
     /**
@@ -37,7 +37,8 @@ class WebsocketService {
      */
     async middleware(socket, next) {
         try {
-            await this.checkUserAccess(socket.handshake.query);
+            const { lobby, player } = await this.checkUserAccess(socket.handshake.query);
+            socket.data = { lobby, player };
             next();
         } catch (error) {
             LOGGER.warn("[WS] Failed websocket connection : " + error.message);
@@ -58,6 +59,10 @@ class WebsocketService {
         client.on("disconnect", () => {
             LOGGER.info("[WS] Connection closed with " + client.handshake.address);
         });
+
+        // Add the player to the lobby ws room
+        client.join(client.data.lobby.id);
+        this.ws.to(client.data.lobby.id).emit("newPlayer", client.data.player.name);
     }
 
     /**
@@ -83,6 +88,8 @@ class WebsocketService {
 
         const player = lobby.players.find(p => p.id === query.playerId);
         if (!player) throw new AuthError(AUTH.ACCESS_DENIED + " Player is not in the lobby");
+
+        return { lobby, player };
     }
 }
 
