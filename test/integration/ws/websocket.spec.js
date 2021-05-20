@@ -93,7 +93,7 @@ describe("API", () => {
 
             chai.assert.equal(response, AUTH.ACCESS_DENIED + " Player is not in the lobby");
         });
-        it("Connection with an existing lobby and an existing Player should work", async () => {
+        it("Successfull connection schould add the the player to the lobby room", async () => {
             // Insert a quiz
             await clearDatabase();
             const l = await insertLobby();
@@ -105,13 +105,14 @@ describe("API", () => {
                 }
             });
 
+            // Test the room message
             const response = await new Promise((resolve) => {
-                socket.on("connection", resolve);
+                socket.on("newPlayer", resolve);
                 socket.on("error", resolve);
             });
-            socket.close();
 
-            chai.assert.equal(response, "CONNECTION_OPENED, connected to the lobby");
+            socket.close();
+            chai.assert.equal(response, l.owner.name);
         });
     });
 });
