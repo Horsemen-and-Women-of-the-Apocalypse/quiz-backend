@@ -1,6 +1,6 @@
 {
     "name": "quiz-backend",
-    "version": "0.0.0",
+    "version": "1.0.0",
     "scripts": {
         "test": "npm run build-src && npm run build-tests && npm run test-coverage",
         "test:ci": "npm run build-src && npm run build-tests && npm run test-coverage:ci",
