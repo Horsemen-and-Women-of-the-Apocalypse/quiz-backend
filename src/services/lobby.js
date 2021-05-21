@@ -1,10 +1,10 @@
+import moment from "moment";
 import ms from "ms";
 import Semaphore from "semaphore";
 import applicationConfig from "../config/application";
 import { Lobby } from "../models/lobby";
-import { LOGGER } from "../utils";
 import { Player } from "../models/player";
-import moment from "moment";
+import { LOGGER } from "../utils";
 
 /**
  * Service interacting with lobby objects
@@ -215,6 +215,11 @@ class LobbyService {
                     const player = lobby.players.find(p => p.id === playerId);
                     if (!(player instanceof Player)) throw new Error("No player with id: " + playerId + " found in the lobby");
 
+                    // Check date
+                    if (lobby.endDate !== null) {
+                        throw new Error("Lobby is ended");
+                    }
+
                     // update the lobby
                     lobby.setPlayerAnswers(player, answers);
 
@@ -306,11 +311,11 @@ class LobbyService {
     }
 
     /**
-    * Get player results of a given lobby
-    *
-    * @param lobbyId Lobby's id
-    * @return {Promise<[{question: string, choices: []}]>} Questions without solution
-    */
+     * Get player results of a given lobby
+     *
+     * @param lobbyId Lobby's id
+     * @return {Promise<[{question: string, choices: []}]>} Questions without solution
+     */
     async getLobbyResults(lobbyId) {
         // Retrieve lobby
         const lobby = await this.lobbyDbService.findById(lobbyId);
