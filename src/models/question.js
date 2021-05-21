@@ -28,7 +28,7 @@ class StringMultipleChoiceQuestion extends Question {
 
         if (typeof solutionIndex === "number") {
             if (Number.isInteger(solutionIndex)) {
-                if (solutionIndex < 0 || solutionIndex > choices.length) {
+                if (solutionIndex < 0 || solutionIndex >= choices.length) {
                     throw new Error("Wrong value of 'solutionIndex'");
                 }
             } else {
