@@ -64,7 +64,7 @@ class QuizService {
                 "question": item._question
             };
 
-            switch(item.constructor.name) {
+            switch (item.constructor.name) {
                 case "StringMultipleChoiceQuestion":
                     q.choices = item._choices;
                     break;
@@ -100,6 +100,7 @@ class QuizService {
         // Check results
         return this.getResultsFromAnswers(quiz, request.answers);
     }
+
     /**
      * Check user's answers for the given quiz
      *
